@@ -1,0 +1,18 @@
+{
+    "fr_FR":{
+        "Compteur": "Compteur",
+        "Modèle": "Modèle",
+        "Moteur": "Moteur",
+        "Année": "Année",
+        "Moteur thermique": "Moteur thermique",
+        "Distance estimée": "Distance estimée",
+        "Réservoir": "Réservoir",
+        "Moteur electrique": "Moteur electrique",
+        "Niveau batterie": "Niveau batterie",
+        "Gain de charge": "Gain de charge",
+        "Puissance de charge": "Puissance de charge",
+        "Temps charge restant": "Temps charge restant",
+        "Limite de charge": "Limite de charge",
+        "Climatisation": "Climatisation"
+    }
+}

@@ -1,0 +1,25 @@
+{
+	"id" : "jeeda",
+	"name" : "Jeedom Skoda",
+	"description" : {
+		"fr_FR": "Plugin de recuperation des informations des véhicules Skoda"
+	},
+	"licence" : "GPL",
+	"author" : "Pappa",
+	"require" : "4.2.0",
+	"category" : "devicecommunication",
+	"display" : "panel",
+	"hasDependency" : true,
+	"hasOwnDeamon" : true,
+	"maxDependancyInstallTime" : 0,
+	"changelog" : "https://jeedom.github.io/plugin-template/#language#/changelog",
+	"documentation" : "https://jeedom.github.io/plugin-template/#language#/",
+	"language": [
+		"fr_FR"
+	],
+	"compatibility": [
+		"rpi",
+		"docker",
+		"diy"
+	]
+}
