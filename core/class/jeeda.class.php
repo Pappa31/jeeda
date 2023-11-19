@@ -245,6 +245,21 @@ public static function deamon_stop() {
     log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
   }
   /**
+   * Recupere les stats de chargement d'un véhicle
+   */
+  public static function getChargingInfoFor($id,$startDate,$endDate){
+    log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
+    log::add('jeeda','debug', $id);
+    $vehicule = eqLogic::byId($id,'jeeda',false);
+    if (is_object($vehicule)){
+      return $vehicule->getChargingInfo($startDate,$endDate);
+    }else{
+      log::add('jeeda','warning', 'ID '. $id . ' inconnu');  
+      throw new Exception('ID '. $id . ' inconnu', jeeda::$ERROR_ID_INCONNU);
+    }
+    log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
+  }
+  /**
    * Fonction qui demande l'arret ou le lancement du chargement
    */
   public static function setCharingMode($id, $mode){
@@ -548,7 +563,62 @@ public static function deamon_stop() {
     }
     return "";
   }
+  public function getChargingInfo($debut,$fin){
+    log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
+    $cmdCharging = $this->getCmd(null, 'charging');
+    $cmdBatteryLevel = $this->getCmd(null, 'battery_level');
+    // detail du trajet basé sur l'evolution de la distance
+    $values = history::all($cmdCharging->getId(),$debut,$fin);
+    $cmdBatteryCapacity = $this->getCmd(null, 'battery_capacity');
+    $cmdChargingPower = $this->getCmd(null, 'charging_power');
+    $capa = is_object($cmdBatteryCapacity) ? $cmdBatteryCapacity->execCmd() : 0;
+    $statGeneral = array();
+    $statDetaillee = array();
+    $statGeneral['totKW'] = 0;
+    $statGeneral['duree'] = 0;
+    $statGeneral['avgChargingPower'] = 0;
+    $nbCharge = 0;
+    $initLevelBattery = 0;
+    $initDate = $debut;
+    $start = False;
+    foreach ($values as $value) {
+      $batteryLevel = history::byCmdIdAtDatetime($cmdBatteryLevel->getId(),$value->getDatetime());
+      $chargingPower = history::byCmdIdAtDatetime($cmdChargingPower->getId(),$value->getDatetime());
+      $date = $value->getDatetime();
+      // debut d'une charge
+      if ($value->getValue() == 1){
+        $nbCharge ++;
+        $initLevelBattery = $batteryLevel->getValue();
+        $start = True;
+        $initDate = $date;
+        $statGeneral['avgChargingPower'] = $statGeneral['avgChargingPower'] + $chargingPower->getValue();
+        $statDetaillee[$date]['avgChargingPower']= $chargingPower->getValue();
+      }
+      else{
+        // Detection que nous avons détecté un debut de charge sur la période
+        if ($start ==  True){
+          $statGeneral['totKW'] = $statGeneral['totKW'] + ($batteryLevel->getValue() - $initLevelBattery) * $capa / 100;
+          $statDetaillee[$initDate]['totKW'] = ($batteryLevel->getValue() - $initLevelBattery) * $capa / 100;
+          $statGeneral['duree'] = $statGeneral['duree'] + strval(floor((strtotime($date) - strtotime($initDate))/60));
+          $statDetaillee[$initDate]['duree'] = strval(floor((strtotime($date) - strtotime($initDate))/60));
+        }
+      }
+    }
+    $statGeneral['nbCharge'] = $nbCharge;
+    $statGeneral['totKW'] = number_format($statGeneral['totKW'], 2);
+    if(0!= $nbCharge)
+      $statGeneral['avgChargingPower'] = number_format($statGeneral['avgChargingPower'] / $nbCharge, 2);
+    else  
+      $statGeneral['avgChargingPower'] = 0;
+    
+    krsort($statDetaillee);
+    $stat['general'] = $statGeneral;
+    $stat['detaillee'] = $statDetaillee;
+      
 
+    log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
+    return json_encode($stat);
+  }
   public function showTravel($debut,$fin){
     log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
     $dateTravel = array();
