@@ -3,9 +3,10 @@
     <center class="widget-name"><a href="#eqLink#" style="font-size : 1.1em;#hideEqLogicName#">#name_display#</a></center>
     <div>
         <div class="container-fluid">
-		
-                <div class="col-xs-4" style="height:78px; width: 140px;">
-                    <div class="col-xs-24" id="titre_tile" style="height:78px;">
+            <div>
+                <div class="col-xs-24" >
+                    <legend>&nbsp;</legend>
+                    <span class="col-xs-24" id="titre_tile">
                         <span class="pull-left">
                             <div style="background: url('#imageSmall#') no-repeat center; background-size: 100% 100%; width: 140px; height: 78px;"></div>
                             <center>
@@ -14,25 +15,23 @@
                                 <span class="logo_#uid_hood_closed#"></span>&nbsp;
                             </center>
                         </span>
-                    </div>
+                    </span>
                     
-                </div>
                 
-                <div class="col-xs-20" style="margin-left: 20px;margin-top: 4px;">
                     <span >Compteur : </span><span id="#uid_distance#">#distance# km</span><br>
                     <span >Modèle : </span><span id="#uid_model#">#model#</span><br>
                     <span >Moteur : </span><span id="#uid_engine_type#">#engine_type#</span>&nbsp;<span id="#uid_engine_power#">#engine_power# kW (#engine_power_ch# CV)</span><br>
                     <span >Année : </span><span id="#uid_model_year#">#model_year#</span><br>
                 </div>
 
-                <div id="thermique_bloc" class="col-xs-24 thermique_bloc">
+                <div id="thermique_bloc" class="col-xs-24 thermique_bloc" style="margin-top: 10px;margin-left:10px;">
                     <legend>Moteur thermique&nbsp;                         
                     </legend>                    
                     <span class="fonc_#uid_thermique_range#">Distance estimée : <span id="#uid_thermique_range#" class="#uid_thermique_range#">#thermique_range# km </span><br></span>
                     <span class="fonc_#uid_engine_capacity#">Réservoir : <span id="#uid_engine_capacity#" class="#uid_engine_capacity#">#engine_capacity# l</span><br></span>
                 </div>
                 
-                <div id="electric_bloc" class="col-xs-24 electric_bloc">
+                <div id="electric_bloc" class="col-xs-24 electric_bloc" style="margin-top: 10px;margin-left:10px;">
                     <legend>Moteur electrique&nbsp; 
                         <span class="logo_#uid_charging_cable_connected#"></span>
                         <span class="logo_#uid_charging#"></span>
@@ -45,7 +44,7 @@
                     <span class="fonc_#uid_charging_time_left#">Temps charge restant : <span id="#uid_charging_time_left#" class="#uid_charging_time_left#">#charging_time_left_H#h#charging_time_left_m# </span><br></span>
                     <span class="fonc_#uid_min_charge_level#">Limite de charge : <span id="#uid_min_charge_level#" class="#uid_min_charge_level#">#min_charge_level# %</span><br></span>
                 </div>
-                <div id="climatisation_bloc" class="col-xs-24 climatisation_bloc">
+                <div id="climatisation_bloc" class="col-xs-24 climatisation_bloc" style="margin-top: 10px;margin-left:10px;">
                     <legend></i>Climatisation&nbsp;<span class="logo_#uid_climatisation_status#"></span>
                     </legend>
                     
@@ -58,7 +57,7 @@
                 <!-- <span style="margin-left: 5px;font-size: 0.8em;" class="cmd noRefresh" data-type="info" data-subtype="string" data-cmd_id="#conditionid#">#condition#</span><br/>
                 <span style="margin-left: 5px;font-size: 0.8em;" class="cmd noRefresh" data-type="info" data-subtype="string" data-cmd_id="#tempid#">#temperature# °C / #humidity# %</span><br/>
                 <span style="margin-left: 5px;font-size: 0.8em;" class="cmd noRefresh" data-type="info" data-subtype="string" data-cmd_id="#pressureid#">#windspeed# km/h | #pressure# mb</span> -->
-        
+            </div>
         </div>
     </div>
 
