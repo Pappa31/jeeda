@@ -6,6 +6,8 @@
 
 # 19/11/2023
 - Correction d'un dysfonctionnement d'affichage sur la tuile des véhicules
+- Ajout des informations du trajet lors de l'affichage du graphique détaillé
+- Ajout des statistiques générales sur les charges
 
 # 15/11/2023
 
