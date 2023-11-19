@@ -123,7 +123,7 @@ function loadData(startDate, endDate){
             console.log(travelsData);
             var tr;
             Object.entries(travelsData).forEach(([key, value]) => {
-                tr = "<tr onclick='showTravel(\" " + key + " \",\"" + value['dateFin'] + "\" )'>";
+                tr = "<tr onclick='showTravel(\" " + key + " \",\"" + value['dateFin'] + "\",\"" + convertTime(value['duree']) + "\",\"" + parseInt(value['distance']) + "\",\"" + parseFloat(value['kwConso']).toFixed(2) + "\",\"" + parseFloat(value['vitesseMoy']).toFixed(2) + "\",\"" + parseFloat(value['consoMoy']).toFixed(2) + "\",\"" + value['WLTP'] + "\"  )'>";
                 tr += "<td>"+key+"</td>";
                 tr += "<td>"+convertTime(value['duree'])+"</td>";
                 tr += "<td>"+parseInt(value['distance'])+"</td>";
@@ -169,7 +169,7 @@ function loadData(startDate, endDate){
     });
 }
 
-function showTravel(start, end){
+function showTravel(start, end, duree, distance,kwConso,vitesseMoy,consoMoy,wltp){
     console.log("showTravel");
     $.ajax({
         type: 'POST',
@@ -269,6 +269,13 @@ function showTravel(start, end){
             //json['series'][3].lineColor = '#000';
             //json.plotOptions = plotOptions;
             $('#travelChart').highcharts(json);
+
+            document.getElementById("FONC_travel_range").innerHTML = distance;
+            document.getElementById("FONC_travel_duration").innerHTML = duree;
+            document.getElementById("FONC_travel_speed").innerHTML = vitesseMoy;
+            document.getElementById("FONC_travel_energy").innerHTML = kwConso;
+            document.getElementById("FONC_travel_wltp").innerHTML = wltp;
+            document.getElementById("FONC_travel_conso").innerHTML = consoMoy;
         }
     });
 }

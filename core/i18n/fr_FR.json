@@ -73,7 +73,7 @@
         "D(conso/reel)": "D(conso/reel)",
         "kW/100 km": "kW/100 km",
         "Autonomie WLTP": "Autonomie WLTP",
-        "Graphique du trajet":"Graphique du trajet",
+        "Detail du trajet":"Détail du trajet",
         "Selectionner un trajet pour voir le détail.": "Selectionner un trajet pour voir le détail."
     },
     "plugins\/jeeda\/core\/template\/dashboard\/panel.php": {
