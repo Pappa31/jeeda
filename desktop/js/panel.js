@@ -122,8 +122,9 @@ function loadData(startDate, endDate){
             travelsData = JSON.parse(data.result);
             console.log(travelsData);
             var tr;
+            $('#table_cmd tbody').empty();
             Object.entries(travelsData).forEach(([key, value]) => {
-                tr = "<tr onclick='showTravel(\" " + key + " \",\"" + value['dateFin'] + "\" )'>";
+                tr = "<tr onclick='showTravel(\" " + key + " \",\"" + value['dateFin'] + "\",\"" + convertTime(value['duree']) + "\",\"" + parseInt(value['distance']) + "\",\"" + parseFloat(value['kwConso']).toFixed(2) + "\",\"" + parseFloat(value['vitesseMoy']).toFixed(2) + "\",\"" + parseFloat(value['consoMoy']).toFixed(2) + "\",\"" + value['WLTP'] + "\"  )'>";
                 tr += "<td>"+key+"</td>";
                 tr += "<td>"+convertTime(value['duree'])+"</td>";
                 tr += "<td>"+parseInt(value['distance'])+"</td>";
@@ -141,12 +142,12 @@ function loadData(startDate, endDate){
         }
     });
 
-    // Recupere les stat de conduite
+    // Recupere les stat de charge
     $.ajax({
         type: 'POST',
         url: 'plugins/jeeda/core/ajax/jeeda.ajax.php',
         data: {
-            action: 'getDriveStatistique',
+            action: 'getChargingData',
             VIN: globalEqLogic,
             startDate: startDate,
             endDate: endDate,
@@ -154,22 +155,37 @@ function loadData(startDate, endDate){
         dataType: 'json',
         global: false,
         error: function (request, status, error) {
-            console.log('Erreur getTravelData');
+            console.log('Erreur getChargingData');
             console.log({message: '{{Erreur chargement des données : }}'+status, level: 'warning'});
             $('#div_alert').showAlert({message: '{{Erreur chargement des données : }}'+status, level: 'warning'});
             handleAjaxError(request, status, error);
         },
         success: function (data) {
-            console.log('Success getDriveStatistique');
+            console.log('Success getChargingData');
             console.log(data);
             stat = JSON.parse(data.result);
             console.log(stat);
-            
+            document.getElementById("FONC_charging_total_energy").innerHTML = stat.general['totKW'];
+            document.getElementById("FONC_charging_total_duration").innerHTML = convertTime(stat.general['duree']);
+            document.getElementById("FONC_charging_count").innerHTML = stat.general['nbCharge'];
+            document.getElementById("FONC_charging_avg_power").innerHTML = stat.general['avgChargingPower'];
+            var tr;
+            $('#table_cmdCharge tbody').empty();
+            Object.entries(stat.detaillee).forEach(([key, value]) => {
+                tr = "<tr>"; // "<tr onclick='showTravel(\" " + key + " \",\"" + value['dateFin'] + "\",\"" + convertTime(value['duree']) + "\",\"" + parseInt(value['distance']) + "\",\"" + parseFloat(value['kwConso']).toFixed(2) + "\",\"" + parseFloat(value['vitesseMoy']).toFixed(2) + "\",\"" + parseFloat(value['consoMoy']).toFixed(2) + "\",\"" + value['WLTP'] + "\"  )'>";
+                tr += "<td>"+key+"</td>";
+                tr += "<td>"+convertTime(value['duree'])+"</td>";
+                tr += "<td>"+parseFloat(value['totKW']).toFixed(2)+"</td>";
+                tr += "<td>"+parseFloat(value['avgChargingPower']).toFixed(0)+"</td>";
+                tr += "</tr>";
+                $('#table_cmdCharge tbody').append(tr);
+            });
+
         }
     });
 }
 
-function showTravel(start, end){
+function showTravel(start, end, duree, distance,kwConso,vitesseMoy,consoMoy,wltp){
     console.log("showTravel");
     $.ajax({
         type: 'POST',
@@ -269,12 +285,25 @@ function showTravel(start, end){
             //json['series'][3].lineColor = '#000';
             //json.plotOptions = plotOptions;
             $('#travelChart').highcharts(json);
+
+            document.getElementById("FONC_travel_range").innerHTML = distance;
+            document.getElementById("FONC_travel_duration").innerHTML = duree;
+            document.getElementById("FONC_travel_speed").innerHTML = vitesseMoy;
+            document.getElementById("FONC_travel_energy").innerHTML = kwConso;
+            document.getElementById("FONC_travel_wltp").innerHTML = wltp;
+            document.getElementById("FONC_travel_conso").innerHTML = consoMoy;
         }
     });
 }
 
 function convertTime(minutes){
-    return parseInt(minutes / 60).toLocaleString(undefined, {minimumIntegerDigits: 2})+"h"+parseInt(minutes % 60).toLocaleString(undefined, {minimumIntegerDigits: 2});
+    retour = '';
+    if (typeof minutes === 'undefined'){
+        retour = '';
+    }else{
+        retour = parseInt(minutes / 60).toLocaleString(undefined, {minimumIntegerDigits: 2})+"h"+parseInt(minutes % 60).toLocaleString(undefined, {minimumIntegerDigits: 2});
+    }
+    return retour;
 }
 
 function updateDOMIcon(key_plugged, etat_plugged, isDisplayed_plugged, id_plugged, key_charging, etat_charging, isDisplayed_charging, id_charging){
