@@ -116,7 +116,7 @@ $eqLogics = eqLogic::byType('jeeda');
                                                 <th>{{Vitesse Moy.}}</th>
                                                 <th>{{kW Conso}}</th>
                                                 <th>{{Impact autonomie}}</th>
-                                                <th>{{D(conso/reel)}}</th>
+                                                <th>{{Efficience}}</th>
                                                 <th>{{kW/100 km}}</th>
                                                 <th>{{Autonomie WLTP}}</th>
                                             </tr>

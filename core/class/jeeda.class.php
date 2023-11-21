@@ -764,7 +764,8 @@ public static function deamon_stop() {
             $trajets[$dateDebut]['delta'] = "";
           }else{
             $trajets[$dateDebut]['consoMoy'] = $trajets[$dateDebut]['kwConso'] / $trajets[$dateDebut]['distance'] * 100;
-            $trajets[$dateDebut]['delta'] = ($trajets[$dateDebut]['kmConso'] - $trajets[$dateDebut]['distance'])/$trajets[$dateDebut]['distance']*100;
+            //$trajets[$dateDebut]['delta'] = ($trajets[$dateDebut]['kmConso'] - $trajets[$dateDebut]['distance'])/$trajets[$dateDebut]['distance']*100;
+            $trajets[$dateDebut]['delta'] = ($trajets[$dateDebut]['kmConso'] / $trajets[$dateDebut]['distance'])*100;
           }
           $trajets[$dateDebut]['vitesseMoy'] = $trajets[$dateDebut]['distance'] / (floor($trajets[$dateDebut]['duree']/60)+($trajets[$dateDebut]['duree']%60)/60);         
           if ($trajets[$dateDebut]['kwConso'] == 0){
