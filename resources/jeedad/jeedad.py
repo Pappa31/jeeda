@@ -157,6 +157,12 @@ class jeedaDemon:
 								if attrJson["vehicle_moving"] == False:
 									globals.CYCLE = globals.PARKING_INFO_CYCLE
 									logging.info("Sleeping for parking mode")
+									if not attrJson["charging"] == None:
+										if attrJson["charging"] == True:
+											if attrJson["charging_power"] != None:
+												if attrJson["charging_power"] > 11000:
+													globals.CYCLE = globals.DRIVE_INFO_CYCLE
+													logging.info("Sleeping for drive mode because charging over 11KW")
 								else:
 									globals.CYCLE = globals.DRIVE_INFO_CYCLE
 									logging.info("Sleeping for drive mode")
