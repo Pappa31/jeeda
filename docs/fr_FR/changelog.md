@@ -4,6 +4,10 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 02/12/2023
+- Ajustement de la tuile pour prise en compte des véhicules thermiques
+- Creation de Widget pour l'affichage sur la tuile
+
 # 29/11/2023
 - Ajustement du cycle de consultation des serveurs lors de charges supérieures à 11kW
 

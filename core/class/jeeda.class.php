@@ -889,166 +889,367 @@ public static function deamon_stop() {
 
     $retour = json_encode($a);
     log::add('jeeda','debug', 'Data car ' . $retour);
-    log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
+    log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
     return $retour;
   }
   /*
   * Permet de modifier l'affichage du widget (également utilisable par les commandes)
   */
  public function toHtml($_version = 'dashboard') {
+    log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
     /** @TODO Pour le dev, à supprimer en prod */
     $this->emptyCacheWidget();
 
+    
     $replace = $this->preToHtml($_version);
 		log::add('jeeda','debug',$replace);
 		//if (!is_array($replace)) {
 		//	return $replace;
 		//}
     $version = jeedom::versionAlias($_version);
-    
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get small image');
     $cmd = $this->getCmd(null, 'model_image_small');
-		$replace['#imageSmall#'] = is_object($cmd) ? $cmd->execCmd() : '';
+    $cmd->setTemplate($version,'image');
+    $cmd->save();
+    $replace['#imageSmall#'] = is_object($cmd) ? $cmd->toHtml($_version, '') : '';
     
+    
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get distance');
     $cmd = $this->getCmd(null, 'distance');
-		$replace['#distance#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_distance#'] = is_object($cmd) ? $cmd->getId() : '';
-    
+    $cmd->setTemplate($version,'distance');
+    $cmd->save();
+    $replace['#distance#'] = is_object($cmd) ? $cmd->toHtml($_version, '') : '';
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get engine type');
     $cmd = $this->getCmd(null, 'engine_type');
-		$replace['#engine_type#'] = is_object($cmd) ? $cmd->execCmd() : '';
+    $cmd->setTemplate($version,'label');
+    $cmd->save();
+    $typeMoteur = $cmd->execCmd();
+    $label['#title#'] = "Type de moteur";
+    $replace['#engine_type#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get model');
+    $cmd = $this->getCmd(null, 'model');
+		$cmd->setTemplate($version,'label');
+    $cmd->save();    
+    $label['#title#'] = "Modèle";
+    $replace['#modele#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
     
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get engine capacity');
+    $cmd = $this->getCmd(null, 'engine_power');
+		$cmd->setTemplate($version,'label');
+    if ($typeMoteur=="iV"){
+      $cmd->setUnite("kw");
+    }
+    else{
+      $cmd->setUnite("CV");
+    }
+    $cmd->save();    
+    $label['#title#'] = "Puissance";
+    $replace['#engine_power#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get model year');
+    $cmd = $this->getCmd(null, 'model_year');
+    $cmd->setTemplate($version,'label');
+    $cmd->save();    
+    $label['#title#'] = "Année";
+    $replace['#model_year#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+		
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get thermique range');
+    $replace['#thermique_range#'] = '';
+    if ($this->getConfiguration("is_combustion_range_supported","0")!=0){
+      $cmd = $this->getCmd(null, 'combustion_range');
+      $cmd->setUnite("Km");
+      $cmd->setTemplate($version,'label');
+      $cmd->save();    
+      $label['#title#'] = "Autonomie";
+      $replace['#thermique_range#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get fuel capacity');
+    $replace['#reservoir#']='';
+    if ($this->getConfiguration("is_fuel_level_supported","0")!=0){
+      $cmd = $this->getCmd(null, 'fuel_level');
+      $cmd->setTemplate($version,'label');
+      $cmd->setUnite("l");
+      $cmd->save();    
+      $label['#title#'] = "Reservoir";
+      $replace['#reservoir#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get drive');
+    $replace['#drive#']='';
+    if ($this->getConfiguration("is_primary_drive_supported","0")!=0){
+      $cmd = $this->getCmd(null, 'primary_drive');
+      $cmd->setTemplate($version,'label');
+      $cmd->save();    
+      $label['#title#'] = "Nombre de rapport";
+      $replace['#drive#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+    
+
+    $replace['#is_thermique_range_id#'] = $this->getConfiguration("is_combustion_range_supported","0") + $this->getConfiguration("is_fuel_level_supported","0")+
+    $this->getConfiguration("is_primary_drive_supported","0");
+    
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get electrique range');
+    $replace['#electric_range#']='';
+    if ($this->getConfiguration("is_electric_range_supported","0")!=0){
+      $cmd = $this->getCmd(null, 'electric_range');
+      $cmd->setTemplate($version,'label');
+      $cmd->setUnite("Km");
+      $cmd->save();    
+      $label['#title#'] = "Autonomie";
+      $replace['#electric_range#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+    
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get battery level');
+    $replace['#battery_level#'] = '';
+    //$replace['#is_battery_level_supported#'] = $this->getConfiguration("is_battery_level_supported","0");
+    if ($this->getConfiguration("is_battery_level_supported","0") != "0"){
+      $cmd = $this->getCmd(null, 'battery_level');
+      log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get battery capacity');
+      if ($this->getConfiguration("is_battery_capacity_supported","0") != "0"){
+        log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::has battery capacity');
+        $cmd->setTemplate($version,'batteryCapa');
+        $cmdCapa = $this->getCmd(null, 'battery_capacity');
+        $label['#capa#'] = $cmdCapa->execCmd();  
+      }
+      else {
+        log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::has no battery capacity');
+        $cmd->setTemplate($version,'label');
+      }
+      $cmd->setUnite("%");
+      $cmd->save();    
+      $label['#title#'] = "Niveau batterie";
+      $replace['#battery_level#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get charge rate');
+    $replace['#gain_charge#'] = '';
+    if ($this->getConfiguration("is_charge_rate_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'charge_rate');
+      $cmd->setTemplate($version,'label');
+      $cmd->setUnite("kw/h");
+      $cmd->save();    
+      $label['#title#'] = "Gain de charge";
+      $replace['#gain_charge#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get charging power');
+    $replace['#charging_power#']='';
+    if ($this->getConfiguration("is_charging_power_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'charging_power');
+      $cmd->setTemplate($version,'label');
+      $cmd->setUnite("w");
+      $cmd->save();    
+      $label['#title#'] = "Puissance de charge";
+      $replace['#charging_power#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get charging time left');
+    $replace['#charging_time_left#'] = '';
+    if ($this->getConfiguration("is_charging_time_left_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'charging_time_left');
+      $cmd->setTemplate($version,'time');
+      $cmd->save();    
+      $label['#title#'] = "Temps de charge restant";
+      $replace['#charging_time_left#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get min charge level');
+    $replace['#min_charge_level#'] = '';
+    if ($this->getConfiguration("is_min_charge_level_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'min_charge_level');
+      $cmd->setTemplate($version,'label');
+      $cmd->setUnite("%");
+      $cmd->save();    
+      $label['#title#'] = "Limite de charge";
+      $replace['#min_charge_level#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get cable connected');
+    $replace['#charging_cable_connected#']='';
+    if ($this->getConfiguration("is_charging_cable_connected_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'charging_cable_connected');
+      $cmd->setTemplate($version,'image');
+      $cmd->save();    
+      if (1==(is_object($cmd) ? $cmd->execCmd() : 0)){
+        $label['#title#'] = "Cable connecté";
+        $label['#color#'] = "rgb(0,208,0)";
+      }
+      else {
+        $label['#title#'] = "Cable non connecté";
+        $label['#color#'] = "rgb(208,208,208)";
+      }
+      $label['#icon#'] = "fa-plug";
+      $replace['#charging_cable_connected#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get cable connected');
+    $replace['#charging#']='';
+    if ($this->getConfiguration("is_charging_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'charging');
+      $cmd->setTemplate($version,'image');
+      $cmd->save();    
+      if (1==(is_object($cmd) ? $cmd->execCmd() : 0)){
+        $label['#title#'] = "En charge";
+        $label['#color#'] = "rgb(208,0,0)";
+      }
+      else {
+        $label['#title#'] = "Pas de charge";
+        $label['#color#'] = "rgb(208,208,208)";
+      }
+      $label['#icon#'] = "kiko-electricity";
+      $replace['#charging#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
+    
+
+    $replace['#is_electric_bloc_id#'] = $this->getConfiguration("is_electric_range_supported","0")+$this->getConfiguration("is_battery_level_supported","0")+
+      $this->getConfiguration("is_charge_rate_supported","0") + $this->getConfiguration("is_charging_power_supported","0")+
+      $this->getConfiguration("is_charging_time_left_supported",0)+$this->getConfiguration("is_min_charge_level_supported",0)+
+      $this->getConfiguration("is_charging_cable_connected_supported",0)+$this->getConfiguration("is_charging_supported",0);
+
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get door locked');
+    $replace['#door_locked#']='';
+    if ($this->getConfiguration("is_door_locked_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'door_locked');
+      $cmd->setTemplate($version,'image');
+      $cmd->save();    
+      if (1==(is_object($cmd) ? $cmd->execCmd() : 0)){
+        $label['#title#'] = "Portes fermées";
+        $label['#color#'] = "rgb(108,108,108)";
+        $label['#icon#'] = "jeedom-lock-ferme";
+      }
+      else {
+        $label['#title#'] = "Portes ouvertes";
+        $label['#color#'] = "rgb(0,208,0)";
+        $label['#icon#'] = "jeedom-lock-ouvert";
+      }
+      $replace['#door_locked#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get window locked');
+    $replace['#windows_closed#']='';
+    if ($this->getConfiguration("is_windows_closed_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'windows_closed');
+      $cmd->setTemplate($version,'image');
+      $cmd->save();    
+      if (1==(is_object($cmd) ? $cmd->execCmd() : 0)){
+        $label['#title#'] = "Fenêtres fermées";
+        $label['#color#'] = "rgb(108,108,108)";
+        $label['#icon#'] = "jeedom-fenetre-ferme";
+      }
+      else {
+        $label['#title#'] = "Fenêtres ouvertes";
+        $label['#color#'] = "rgb(0,208,0)";
+        $label['#icon#'] = "jeedom-fenetre-ouverte";
+      }
+      $replace['#windows_closed#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get hood locked');
+    $replace['#hood_closed#']='';
+    if ($this->getConfiguration("is_hood_closed_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'hood_closed');
+      $cmd->setTemplate($version,'image');
+      $cmd->save();    
+      if (1==(is_object($cmd) ? $cmd->execCmd() : 0)){
+        $label['#title#'] = "Capot fermé";
+        $label['#color#'] = "rgb(108,108,108)";
+      }
+      else {
+        $label['#title#'] = "Capot ouvert";
+        $label['#color#'] = "rgb(0,208,0)";
+      }
+      $label['#icon#'] = "kiko-car";
+      $replace['#hood_closed#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
+    /*log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get engine power');
     $cmd = $this->getCmd(null, 'engine_power');
 		$replace['#engine_power#'] = is_object($cmd) ? $cmd->execCmd() : '';
     $replace['#engine_power_ch#'] = is_object($cmd) ? round($cmd->execCmd()*1.36) : '';
     
-    $cmd = $this->getCmd(null, 'model_year');
-		$replace['#model_year#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    
-    $cmd = $this->getCmd(null, 'model');
-		$replace['#model#'] = is_object($cmd) ? $cmd->execCmd() : '';
-
-    $cmd = $this->getCmd(null, 'door_locked');
-    $replace['#door_locked#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_door_locked#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#door_locked_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_door_locked_supported#'] = $this->getConfiguration("is_door_locked_supported","0");
-
-    $cmd = $this->getCmd(null, 'windows_closed');
-    $replace['#windows_closed#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_windows_closed#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#windows_closed_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_windows_closed_supported#'] = $this->getConfiguration("is_windows_closed_supported");
-    
-    
-    $cmd = $this->getCmd(null, 'hood_closed');
-    $replace['#hood_closed#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_hood_closed#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#hood_closed_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_hood_closed_supported#'] = $this->getConfiguration("is_hood_closed_supported", "0");
-    
-    /*** Information sur la partie electrique */
-    $cmd = $this->getCmd(null, 'charging_cable_connected');
-		$replace['#charging_cable_connected#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_charging_cable_connected#'] = is_object($cmd) ? $cmd->getId() : '';
-    
-    $cmd = $this->getCmd(null, 'charging');
-		$replace['#charging#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_charging#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#uid_charging_date#'] = is_object($cmd) ? $cmd->getValueDate() : '';
-    
-    $cmd = $this->getCmd(null, 'engine_capacity');
-		$replace['#engine_capacity#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_engine_capacity#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#engine_capacity_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_engine_capacity_supported#'] = $this->getConfiguration("is_engine_capacity_supported", "0");
-
-    $cmd = $this->getCmd(null, 'thermique_range');
-		$replace['#thermique_range#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_thermique_range#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#thermique_range_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_thermique_range_supported#'] = $this->getConfiguration("is_thermique_range_supported","0");
-
-
-    $cmd = $this->getCmd(null, 'electric_range');
-		$replace['#electric_range#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_electric_range#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#electric_range_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_electric_range_supported#'] = $this->getConfiguration("is_electric_range_supported","0");
-
-    $cmd = $this->getCmd(null, 'battery_level');
-    $levelbattery = $cmd->execCmd();
-		$replace['#battery_level#'] = is_object($cmd) ? $levelbattery : '';
-    $replace['#uid_battery_level#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#battery_level_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_battery_level_supported#'] = $this->getConfiguration("is_battery_level_supported","0");
-
-    $cmd = $this->getCmd(null, 'battery_capacity');
-    $replace['#uid_charge_actual#'] = round($levelbattery * $cmd->execCmd() / 100);
-		$replace['#battery_capacity#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_battery_capacity#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#battery_capacity_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_battery_capacity_supported#'] = $this->getConfiguration("is_battery_capacity_supported","0");
-
-    $cmd = $this->getCmd(null, 'charge_rate');
-		$replace['#charge_rate#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_charge_rate#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#charge_rate_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_charge_rate_supported#'] = $this->getConfiguration("is_charge_rate_supported","0");
-
-    $cmd = $this->getCmd(null, 'charging_power');
-		$replace['#charging_power#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_charging_power#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#charging_power_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_charging_power#'] = $this->getConfiguration("is_charging_power_supported","0");
-
-    $cmd = $this->getCmd(null, 'min_charge_level');
-		$replace['#min_charge_level#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_min_charge_level#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#min_charge_level_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_min_charge_level#'] = $this->getConfiguration("is_min_charge_level_supported","0");
-
-    $cmd = $this->getCmd(null, 'charging_time_left');
-		$replace['#charging_time_left#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#charging_time_left_H#'] = is_object($cmd) ? floor($cmd->execCmd()/60) : '';
-    $replace['#charging_time_left_m#'] = is_object($cmd) ? $cmd->execCmd()%60 : '';
-    $replace['#uid_charging_time_left#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#charging_time_left_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;    
-    $replace['#is_charging_time_left_supported#'] = $this->getConfiguration("is_charging_time_left_supported","0");
-    
+    */ 
+  
     /** Information sur la partie climatisation */
-    $cmd = $this->getCmd(null, 'electric_climatisation_attributes_status');
-		$replace['#climatisation_status#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_climatisation_status#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#climatisation_status_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_climatisation_supported#'] = $this->getConfiguration("is_climatisation_supported","0");
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get climatisation');
+    $replace['#target_temp#'] = '';
+    if ($this->getConfiguration("is_climatisation_target_temperature_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'climatisation_target_temperature');
+      $cmd->setTemplate($version,'label');
+      $cmd->setUnite("°");
+      $cmd->save();    
+      $label['#title#'] = "Consigne";
+      $replace['#target_temp#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
 
-    $cmd = $this->getCmd(null, 'climatisation_target_temperature');
-		$replace['#climatisation_target_temperature#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#uid_climatisation_target_temperature#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#climatisation_target_temperature_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
-    $replace['#is_climatisation_target_temperature_supported#'] = $this->getConfiguration("is_climatisation_target_temperature_supported","0");
-    $forcast_template = getTemplate('core', $version, 'cmd.action.slider.button');
-    $replaceTargetClim['#id#']=$cmd->getId();
-    $replaceTargetClim['#uid#']=$cmd->getId();
-    $replaceTargetClim['#version#']=$version;
-    $replaceTargetClim['#eqLogic_id#']=$this->getId();
-    $replaceTargetClim['#name_display#']="Consigne";
-    $replaceTargetClim['#hide_name#']="Consigne";
-    $replaceTargetClim['#step#']=1;
-    $replaceTargetClim['#maxValue#']=24;
-    $replaceTargetClim['#minValue#']=18;
-    $replaceTargetClim['#state#']=$cmd->execCmd();
-    $replaceTargetClim['#unite#']=$cmd->getUnite();
-    $replace['#template_target_temp#'] .= template_replace($replaceTargetClim, $forcast_template);
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get climatisation time left');
+    $replace['#climatisation_time_left#'] = '';
+    if ($this->getConfiguration("is_climatisation_time_left_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'climatisation_time_left');
+      $cmd->setTemplate($version,'time');
+      $cmd->save(); 
+      $label['#title#'] = "Temps restant";   
+      $replace['#climatisation_time_left#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
 
-    /** Temps restant de climatisation */
-    $cmd = $this->getCmd(null, 'climatisation_time_left');
-		$replace['#climatisation_time_left#'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $replace['#climatisation_time_left_H#'] = is_object($cmd) ? floor($cmd->execCmd()/60) : '';
-    $replace['#climatisation_time_left_m#'] = is_object($cmd) ? $cmd->execCmd()%60 : '';
-    $replace['#uid_climatisation_time_left#'] = is_object($cmd) ? $cmd->getId() : '';
-    $replace['#climatisation_time_left_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;    
-    $replace['#is_climatisation_time_left_supported#'] = $this->getConfiguration("is_climatisation_time_left_supported");
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get climatisation');
+    $replace['#climatisation_status#']='';
+    if ($this->getConfiguration("is_climatisation_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'electric_climatisation_attributes_status');
+      $cmd->setTemplate($version,'clim');
+      $cmd->save();    
+      if ("On"==(is_object($cmd) ? $cmd->execCmd() : 0)){
+        $label['#title#'] = "Climatisation allumée";
+        $label['#color#'] = "rgb(0,129,150)";
+      }
+      else {
+        $label['#title#'] = "Climatisation etteinte";
+        $label['#color#'] = "rgb(208,208,208)";
+      }
+      $label['#icon#'] = "jeedomapp-weather";
+      $replace['#climatisation_status#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
+
     
+    $replace['#climatisation_bloc_id#'] = $this->getConfiguration("is_climatisation_target_temperature_supported","0")+
+      $this->getConfiguration("is_climatisation_time_left_supported",0) + $this->getConfiguration("is_climatisation_supported",0);
+    
+ 
+    /*   log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get climatisation');
+    $replace['#is_climatisation_supported#'] = $this->getConfiguration("is_climatisation_supported","0");
+    if ($this->getConfiguration("is_climatisation_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'electric_climatisation_attributes_status');
+      $replace['#climatisation_status#'] = is_object($cmd) ? $cmd->execCmd() : '';
+      $replace['#uid_climatisation_status#'] = is_object($cmd) ? $cmd->getId() : '';
+      $replace['#climatisation_status_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
+    }
+
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get clim target temp');
+    $replace['#is_climatisation_target_temperature_supported#'] = $this->getConfiguration("is_climatisation_target_temperature_supported","0");
+    if ($this->getConfiguration("is_climatisation_target_temperature_supported",0) != "0"){
+      $cmd = $this->getCmd(null, 'climatisation_target_temperature');
+      $replace['#climatisation_target_temperature#'] = is_object($cmd) ? $cmd->execCmd() : '';
+      $replace['#uid_climatisation_target_temperature#'] = is_object($cmd) ? $cmd->getId() : '';
+      $replace['#climatisation_target_temperature_visible#'] = is_object($cmd) ? $cmd->getIsVisible() : 0;
+      $forcast_template = getTemplate('core', $version, 'cmd.action.slider.button');
+      $replaceTargetClim['#id#']=$cmd->getId();
+      $replaceTargetClim['#uid#']=$cmd->getId();
+      $replaceTargetClim['#version#']=$version;
+      $replaceTargetClim['#eqLogic_id#']=$this->getId();
+      $replaceTargetClim['#name_display#']="Consigne";
+      $replaceTargetClim['#hide_name#']="Consigne";
+      $replaceTargetClim['#step#']=1;
+      $replaceTargetClim['#maxValue#']=24;
+      $replaceTargetClim['#minValue#']=18;
+      $replaceTargetClim['#state#']=$cmd->execCmd();
+      $replaceTargetClim['#unite#']=$cmd->getUnite();
+      $replace['#template_target_temp#'] .= template_replace($replaceTargetClim, $forcast_template);
+    }
+*/
 
     return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'widget', 'jeeda')));
   }

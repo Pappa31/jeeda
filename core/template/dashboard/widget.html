@@ -4,294 +4,62 @@
     <div>
         <div class="container-fluid">
             <div>
-                <div class="col-xs-24" >
+                <div class="col-xs-24" style="width:450px;">
                     <legend>&nbsp;</legend>
                     <span class="col-xs-24" id="titre_tile">
                         <span class="pull-left">
-                            <div style="background: url('#imageSmall#') no-repeat center; background-size: 100% 100%; width: 140px; height: 78px;"></div>
+                            #imageSmall#
                             <center>
-                                <span class="logo_#uid_door_locked#"></span>&nbsp;
-                                <span class="logo_#uid_windows_closed#"></span>&nbsp;
-                                <span class="logo_#uid_hood_closed#"></span>&nbsp;
+                                #door_locked#&nbsp;
+                                #windows_closed#&nbsp;
+                                #hood_closed#&nbsp;
                             </center>
                         </span>
                     </span>
-                    
-                
-                    <span >Compteur : </span><span id="#uid_distance#">#distance# km</span><br>
-                    <span >Modèle : </span><span id="#uid_model#">#model#</span><br>
-                    <span >Moteur : </span><span id="#uid_engine_type#">#engine_type#</span>&nbsp;<span id="#uid_engine_power#">#engine_power# kW (#engine_power_ch# CV)</span><br>
-                    <span >Année : </span><span id="#uid_model_year#">#model_year#</span><br>
+                    #distance#
+                    #modele#
+                    #engine_type#
+                    #engine_power#
+                    #model_year#
+                </div>
+                <div id="thermique_bloc_#id#" class="col-xs-24 thermique_bloc" style="margin-top: 10px;margin-left:10px;">
+                    <legend>Moteur thermique&nbsp;</legend>
+                    #thermique_range#
+                    #reservoir#
+                    #drive#
+                </div>
+                <div id="electric_bloc_#id#" class="col-xs-24 electric_bloc" style="margin-top: 10px;margin-left:10px;">
+                    <legend>Moteur electrique&nbsp; 
+                        #charging_cable_connected#&nbsp;
+                        #charging#
+                    </legend>
+                    #electric_range#
+                    #battery_level#
+                    #gain_charge#
+                    #charging_power#
+                    #charging_time_left#
+                    #min_charge_level#
+                </div>
+                <div id="climatisation_bloc_#id#" class="col-xs-24 climatisation_bloc" style="margin-top: 10px;margin-left:10px;">
+                    <legend></i>Climatisation&nbsp;#climatisation_status#</legend>                   
+                    #target_temp#
+                    #climatisation_time_left#
                 </div>
 
-                <div id="thermique_bloc" class="col-xs-24 thermique_bloc" style="margin-top: 10px;margin-left:10px;">
-                    <legend>Moteur thermique&nbsp;                         
-                    </legend>                    
-                    <span class="fonc_#uid_thermique_range#">Distance estimée : <span id="#uid_thermique_range#" class="#uid_thermique_range#">#thermique_range# km </span><br></span>
-                    <span class="fonc_#uid_engine_capacity#">Réservoir : <span id="#uid_engine_capacity#" class="#uid_engine_capacity#">#engine_capacity# l</span><br></span>
-                </div>
-                
-                <div id="electric_bloc" class="col-xs-24 electric_bloc" style="margin-top: 10px;margin-left:10px;">
-                    <legend>Moteur electrique&nbsp; 
-                        <span class="logo_#uid_charging_cable_connected#"></span>
-                        <span class="logo_#uid_charging#"></span>
-                    </legend>
-                    
-                    <span class="fonc_#uid_electric_range#">Distance estimée : <span id="#uid_electric_range#" class="#uid_electric_range#">#electric_range# km </span><br></span>
-                    <span class="fonc_#uid_battery_level#">Niveau batterie : <span id="#uid_battery_level#" class="#uid_battery_level#">#battery_level# %</span><span id="#uid_battery_capacity#" class="#uid_battery_capacity#"> (#uid_charge_actual# kW / #battery_capacity# kW)</span><br></span>
-                    <span class="fonc_#uid_charge_rate#">Gain de charge : <span id="#uid_charge_rate#" class="#uid_charge_rate#">#charge_rate# Km/h </span><br></span>
-                    <span class="fonc_#uid_charging_power#">Puissance de charge : <span id="#uid_charging_power#" class="#uid_charging_power#">#charging_power# W</span><br></span>
-                    <span class="fonc_#uid_charging_time_left#">Temps charge restant : <span id="#uid_charging_time_left#" class="#uid_charging_time_left#">#charging_time_left_H#h#charging_time_left_m# </span><br></span>
-                    <span class="fonc_#uid_min_charge_level#">Limite de charge : <span id="#uid_min_charge_level#" class="#uid_min_charge_level#">#min_charge_level# %</span><br></span>
-                </div>
-                <div id="climatisation_bloc" class="col-xs-24 climatisation_bloc" style="margin-top: 10px;margin-left:10px;">
-                    <legend></i>Climatisation&nbsp;<span class="logo_#uid_climatisation_status#"></span>
-                    </legend>
-                    
-                    <span class="fonc_#uid_climatisation_target_temperature#">#template_target_temp#<br></span>
-                    <span class="fonc_#uid_climatisation_time_left#">Temps restant : <span id="#uid_climatisation_time_left#" class="#uid_climatisation_time_left#">#climatisation_time_left_H#h#climatisation_time_left_m# </span><br></span>
-                </div>
-                    
                 #divGraphInfo#    
-               
-                <!-- <span style="margin-left: 5px;font-size: 0.8em;" class="cmd noRefresh" data-type="info" data-subtype="string" data-cmd_id="#conditionid#">#condition#</span><br/>
-                <span style="margin-left: 5px;font-size: 0.8em;" class="cmd noRefresh" data-type="info" data-subtype="string" data-cmd_id="#tempid#">#temperature# °C / #humidity# %</span><br/>
-                <span style="margin-left: 5px;font-size: 0.8em;" class="cmd noRefresh" data-type="info" data-subtype="string" data-cmd_id="#pressureid#">#windspeed# km/h | #pressure# mb</span> -->
+
             </div>
         </div>
     </div>
-
-
-	
-	<script>
-        // Ajout des actions
-        /*$('.logo_#uid_charging#').on('click', function () {
-            setChargingMode($('.icon_#uid_charging#')[0].dataset.eqlogic_id, $('.icon_#uid_charging#')[0].dataset.charging);
-        })*/
-        // Affichage la partie climatisation si disponible
-        if (0 == #is_climatisation_supported# ){
-            $('.climatisation_bloc').hide();
-        } else {
-            // Affiche les logo pour climatisation en route
-            if (0 == #climatisation_status_visible#){
-                jeedom.cmd.update['#uid_climatisation_status#'] = function(_options) {
-                    if ( _options.display_value == "On" )  {			
-                        $('.logo_#uid_climatisation_status#').empty().append('<i class="fas jeedomapp-weather"  style="color:rgb(0,129,150)" title="Climatisation allumée"></i>');
-                    }
-                    if ( _options.display_value == "Off" || _options.display_value == "" )  {			
-                        $('.logo_#uid_climatisation_status#').empty().append('<i class="fas jeedomapp-weather"  style="color:rgb(208,208,208)" title="Climatisation etteinte"></i>');
-                    }
-                }
-                jeedom.cmd.update['#uid_climatisation_status#']({display_value:'#climatisation_status#'});
-            }
-
-            // Affiche les informations du temps restant pour la climatisation
-            if (0 == #is_climatisation_time_left_supported# || 0 == #climatisation_time_left_visible#) {
-                $('.fonc_#uid_climatisation_time_left#').hide();
-            } else {
-                jeedom.cmd.update['#uid_climatisation_time_left#'] = function(_options) {
-                document.getElementById("#uid_climatisation_time_left#").innerHTML= Math.floor(_options.display_value / 60) +"h" + (_options.display_value % 60);
-                }
-                jeedom.cmd.update['#uid_climatisation_time_left#']({display_value:'#climatisation_time_left#'});
-            }
-
+    <script>
+        if (0 == #is_thermique_range_id#){
+            document.getElementById('thermique_bloc_#id#').hidden=true;
         }
-        // Affichage la partie moteur thermique
-        if (0 == #is_engine_capacity_supported# ){
-            $('.thermique_bloc').hide();
-        } else {
-            // Affichage de la distance thermique si disponible
-            if (0 == #is_thermique_range_supported# || 0 == #thermique_range_visible#) {
-                $('.fonc_#uid_thermique_range#').hide();
-            } else {
-                jeedom.cmd.update['#uid_thermique_range#'] = function(_options) {
-                    document.getElementById('#uid_thermique_range#').innerHTML=_options.display_value + " km"
-                }
-                jeedom.cmd.update['#uid_thermique_range#']({display_value:'#thermique_range#'});
-            }
-            // Affichage de la capacite du reservoir si disponible
-            if (0 == #is_engine_capacity_supported# || 0 == #engine_capacity_visible#) {
-                $('.fonc_#uid_engine_capacity#').hide();
-            } else {
-                jeedom.cmd.update['#uid_engine_capacity#'] = function(_options) {
-                    document.getElementById('#uid_engine_capacity#').innerHTML=_options.display_value + " km"
-                }
-                jeedom.cmd.update['#uid_engine_capacity#']({display_value:'#engine_capacity#'});
-            }
+        if (0 == #is_electric_bloc_id#){
+            document.getElementById('electric_bloc_#id#').hidden=true;
         }
-
-
-        // Affichage de la distance electrique si disponible
-        if (0 == #is_electric_range_supported# || 0 == #electric_range_visible#) {
-            $('.fonc_#uid_electric_range#').hide();
-        } else {
-            jeedom.cmd.update['#uid_electric_range#'] = function(_options) {
-                document.getElementById('#uid_electric_range#').innerHTML=_options.display_value + " km"
-            }
-            jeedom.cmd.update['#uid_electric_range#']({display_value:'#electric_range#'});
-        }
-
-        // Affichage du niveau de batterie si disponible
-        if (0 == #is_battery_level_supported# || 0 == #battery_level_visible#) {
-            $('.fonc_#uid_battery_level#').hide();
-        } else {
-            jeedom.cmd.update['#uid_battery_level#'] = function(_options) {
-                document.getElementById('#uid_battery_level#').innerHTML=_options.display_value + " %";
-                if (1 == #is_battery_capacity_supported# || 1 == #battery_capacity_visible#) {
-                    document.getElementById('#uid_battery_capacity#').innerHTML = ' (' + (_options.display_value * _options.batCap/100) + 'kW / ' + _options.batCap + ' kW)';
-                 }
-                jeedom.cmd.update['#uid_battery_level#']({display_value:'#battery_level#',batCap:'#battery_capacity#'});
-            }
-        }
-
-        // Affiche les informations de puissance de charge si disponible
-        if (0 == #is_charging_power# || 0 == #charging_power_visible#) {
-            $('.fonc_#uid_charging_power#').hide();
-        } else {
-            jeedom.cmd.update['#uid_charging_power#'] = function(_options) {
-				document.getElementById('#uid_charging_power#').innerHTML=_options.display_value + " W"
-            }
-            jeedom.cmd.update['#uid_charging_power#']({display_value:'#charging_power#'});
-        }
-
-        // Affiche les informations de gain en Km/h si disponible
-        if (0 == #is_charge_rate_supported# || 0 == #charge_rate_visible#) {
-            $('.fonc_#uid_charge_rate#').hide();
-        } else {
-            jeedom.cmd.update['#uid_charge_rate#'] = function(_options) {
-                document.getElementById('#uid_charge_rate#').innerHTML=_options.display_value +" Km/h"
-            }
-            jeedom.cmd.update['#uid_charge_rate#']({display_value:'#charge_rate#'});
-        }
-
-        // Affiche les informations du temps restant pour la charge
-        if (0 == #is_charging_time_left_supported# || 0 == #charging_time_left_visible#) {
-            $('.fonc_#uid_charging_time_left#').hide();
-        } else {
-            jeedom.cmd.update['#uid_charging_time_left#'] = function(_options) {
-               document.getElementById("#uid_charging_time_left#").innerHTML= Math.floor(_options.display_value / 60) +"h" + (_options.display_value % 60);
-            }
-            jeedom.cmd.update['#uid_charging_time_left#']({display_value:'#charging_time_left#'});
-        }
-
-        // Affiche les informations de limite de charge si disponible
-        if (0 == #is_min_charge_level# || 0 == #min_charge_level_visible#) {
-            $('.fonc_#uid_min_charge_level#').hide();
-        } else {
-            jeedom.cmd.update['#uid_min_charge_level#'] = function(_options) {
-                document.getElementById('#uid_min_charge_level#').innerHTML=_options.display_value +" %"
-            }
-            jeedom.cmd.update['#uid_min_charge_level#']({display_value:'#min_charge_level#'});
-        }
-
-        // Affiche les logo pour chargement en cours
-        jeedom.cmd.update['#uid_charging#'] = function(_options) {
-			if ( _options.display_value == "1" )  {			
-				$('.logo_#uid_charging#').empty().append('<i class="fas kiko-electricity icon_#uid_charging#" data-charging=True data-eqlogic_id="#id#" style="color:rgb(208,0,0)" title="Chargement en cours depuis #uid_charging_date#"></i>');
-			}
-			if ( _options.display_value == "0" || _options.display_value == "" )  {			
-				$('.logo_#uid_charging#').empty().append('<i class="fas kiko-electricity icon_#uid_charging#" data-charging=False data-eqlogic_id="#id#" style="color:rgb(208,208,208)" title="Pas de chargement"></i>');
-			}
-		}
-		jeedom.cmd.update['#uid_charging#']({display_value:'#charging#'});
-        
-        // Affiche les logo pour cable connecte
-        jeedom.cmd.update['#uid_charging_cable_connected#'] = function(_options) {
-			if ( _options.display_value == "1" )  {			
-				$('.logo_#uid_charging_cable_connected#').empty().append('<i class="fas fa-plug"  style="color:rgb(0,208,0)" title="Véhicule branché"></i>');
-                // Ajout du bouton pour lancer/arreter la charge
-                jeedom.cmd.update['#uid_charging#']({display_value:'#charging#'});
-			}
-			if ( _options.display_value == "0" || _options.display_value == "" )  {			
-				$('.logo_#uid_charging_cable_connected#').empty().append('<i class="fas fa-plug"  style="color:rgb(208,208,208)" title="Véhicule non branché"></i>');
-                // Masque le bouton pour lancer le chargement
-                $('.logo_#uid_charging#').empty();
-			}
-		}
-		jeedom.cmd.update['#uid_charging_cable_connected#']({display_value:'#charging_cable_connected#'});
-        
-        
-        // Affiche les logo pour le verrouiallge des portes
-        if (0 == #is_door_locked_supported# || 0 == #door_locked_visible#) {
-            $('.logo_#uid_door_locked#').hide();
-        } else {
-            jeedom.cmd.update['logo_#uid_door_locked#'] = function(_options) {
-                if ( _options.display_value == "1" )  {			
-                    $('.logo_#uid_door_locked#').empty().append('<i class="fas jeedom-lock-ferme"  style="color:rgb(108,108,108)" title="Véhicule fermé"></i>');
-                }
-                if ( _options.display_value == "0" || _options.display_value == "" )  {			
-                    $('.logo_#uid_door_locked#').empty().append('<i class="fas jeedom-lock-ouvert"  style="color:rgb(0,208,0)" title="Véhicule ouvert"></i>');
-                }
-            }
-            jeedom.cmd.update['logo_#uid_door_locked#']({display_value:'#door_locked#'});
-        }
-
-        // Affiche les logo pour le verrouiallge des fenetres
-        if (0 == #is_windows_closed_supported# || 0 == #windows_closed_visible#) {
-            $('.logo_#uid_windows_closed#').hide();
-        } else {
-            jeedom.cmd.update['logo_#uid_windows_closed#'] = function(_options) {
-                if ( _options.display_value == "1" )  {			
-                    $('.logo_#uid_windows_closed#').empty().append('<i class="fas jeedom-fenetre-ferme"  style="color:rgb(108,108,108)" title="Fenêtres fermées"></i>');
-                }
-                if ( _options.display_value == "0" || _options.display_value == "" )  {			
-                    $('.logo_#uid_windows_closed#').empty().append('<i class="fas jeedom-fenetre-ouverte"  style="color:rgb(0,208,0)" title="Fenêtres ouvertes"></i>');
-                }
-            }
-            jeedom.cmd.update['logo_#uid_windows_closed#']({display_value:'#windows_closed#'});
-        }
-        // Affiche les logo pour le verrouiallge du capot
-        if (0 == #is_hood_closed_supported# || 0 == #hood_closed_visible#) {
-            $('.logo_#uid_hood_closed#').hide();
-        } else {
-            jeedom.cmd.update['logo_#uid_hood_closed#'] = function(_options) {
-                if ( _options.display_value == "1" )  {			
-                    $('.logo_#uid_hood_closed#').empty().append('<i class="fas kiko-car"  style="color:rgb(108,108,108)" title="Capot fermé"></i>');
-                }
-                if ( _options.display_value == "0" || _options.display_value == "" )  {			
-                    $('.logo_#uid_hood_closed#').empty().append('<i class="fas kiko-car"  style="color:rgb(0,208,0)" title="Fenêtre ouvert"></i>');
-                }
-            }
-            jeedom.cmd.update['logo_#uid_hood_closed#']({display_value:'#hood_closed#'});
-        }
-
-        /**
-         * Demande l'arret de la charge
-         */
-        function setChargingMode(id,mode){
-            // Desactive le bouton 
-            $('.logo_#uid_charging#').unbind('click');
-            $('#div_alert').showAlert({message: 'Demande en cours', level: 'success'});
-            $.ajax({
-                type: "POST",
-                url: "plugins/jeeda/core/ajax/jeeda.ajax.php",
-                data: {
-                action: "setChargingMode",
-                mode: mode,
-                id: id,
-                },
-                dataType: 'json',
-                global: false,
-                error: function (request, status, error) {
-                    //active le bouton
-                    $('.logo_#uid_charging#').on('click', function () {
-                        setChargingMode($('.icon_#uid_charging#')[0].dataset.eqlogic_id, $('.icon_#uid_charging#')[0].dataset.charging);
-                    })
-                    $('#div_alert').showAlert({message: 'Demande refusée : '+status, level: 'warning'});
-                    handleAjaxError(request, status, error);
-                },
-                success: function (data) {
-                    //active le bouton
-                    $('.logo_#uid_charging#').on('click', function () {
-                        setChargingMode($('.icon_#uid_charging#')[0].dataset.eqlogic_id, $('.icon_#uid_charging#')[0].dataset.charging);
-                    })
-                    if (data.state != 'ok') {
-                        $('#div_alert').showAlert({message: data.result, level: 'warning'});
-                        return;
-                    }
-                    $('#div_alert').showAlert({message: 'Demande acceptée', level: 'success'});
-                }
-            });
+        if (0 == #climatisation_bloc_id#){
+            document.getElementById('climatisation_bloc_#id#').hidden=true;
         }
     </script>
 </div>
