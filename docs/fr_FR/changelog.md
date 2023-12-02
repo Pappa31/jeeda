@@ -7,6 +7,7 @@
 # 02/12/2023
 - Ajustement de la tuile pour prise en compte des véhicules thermiques
 - Creation de Widget pour l'affichage sur la tuile
+- Mise à jour du panel pour prise en compte de plusieurs vehicules et des vehicules thermiques
 
 # 29/11/2023
 - Ajustement du cycle de consultation des serveurs lors de charges supérieures à 11kW
