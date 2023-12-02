@@ -61,8 +61,8 @@ $eqLogics = eqLogic::byType('jeeda');
                 </div>
                 <div class="col-xs-4 jeeda_panel_flat_tile FONC_moteur_thermique" id="FONC_moteur_thermique"  style="width:140px;">
                     <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Moteur thermique}}</div>
-                    <div class="jeeda_panel_flat_value_tile ">{{Autonomie}} : <span class="FONC_thermique_range" id="FONC_thermique_range">---</span> km </div>
-                    <div class="jeeda_panel_flat_value_tile ">{{Réservoir}} : <span class="FONC_engine_capacity" id="FONC_engine_capacity">--</span> l</div>
+                    <div class="jeeda_panel_flat_value_tile ">{{Autonomie}} : <span class="FONC_combustion_range" id="FONC_combustion_range">---</span> km </div>
+                    <div class="jeeda_panel_flat_value_tile ">{{Réservoir}} : <span class="FONC_fuel_level" id="FONC_fuel_level">--</span> l</div>
                 </div>
                 <div class="col-xs-4 jeeda_panel_flat_tile FONC_moteur_electrique" id="FONC_moteur_electrique"  style="width:140px;">
                     <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Moteur electrique}}</div>
@@ -83,7 +83,7 @@ $eqLogics = eqLogic::byType('jeeda');
                 </div>
                 <div class="col-xs-4 jeeda_panel_flat_tile FONC_entretien" id="FONC_entretien"  style="width:140px;">
                     <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Entretien}}</div>
-                    <div class="jeeda_panel_flat_value_tile FONC_oil_inspection_distance" id="FONC_oil_inspection_distance">{{Entretien dans}} --- km</div>
+                    <div class="jeeda_panel_flat_value_tile " ><span class="FONC_service_inspection_distance" id="FONC_service_inspection_distance">{{Entretien dans}} --- km</span> </div>
                 </div>
             </div>
 
@@ -97,7 +97,7 @@ $eqLogics = eqLogic::byType('jeeda');
                 <!-- Onglets -->
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Trajets}}</a></li>
-                    <li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas jeedom-prise"></i> {{Charges}}</a></li>
+                    <li role="presentation" class="TAB_charge"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas jeedom-prise"></i> {{Charges}}</a></li>
                 </ul>
                 <div class="tab-content">
                     <!-- Onglet des trajets -->
@@ -127,37 +127,37 @@ $eqLogics = eqLogic::byType('jeeda');
                                     </table>
                                 </div>
                             </div>
-                            <div class="col-xs-12 jeeda_panel_flat_tile FONC_trajet">
-                        <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Detail du trajet}}</div>
-                        <div class="col-xs-12">
-                            <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
-                                <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Distance}}</div>
-                                <center><span class="FONC_travel_range" id="FONC_travel_range">---</span> km </center>
-                            </div>
-                            <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
-                                <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{kW Conso}}</div>
-                                <center><span class="FONC_travel_energy" id="FONC_travel_energy">---</span> kw </center>
-                            </div>
-                            <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
-                                <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Durée}}</div>
-                                <center><span class="FONC_travel_duration" id="FONC_travel_duration">--h--</span> </center>
-                            </div>
-                            <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
-                                <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Vitesse}}</div>
-                                <center><span class="FONC_travel_speed" id="FONC_travel_speed">---</span> km / h </center>
-                            </div>
-                            <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
-                                <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Consommation}}</div>
-                                <center><span class="FONC_travel_conso" id="FONC_travel_conso">---</span> kw/100 </center>
-                            </div>
-                            <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
-                                <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{WLTP}}</div>
-                                <center><span class="FONC_travel_wltp" id="FONC_travel_wltp">---</span> km </center>
-                            </div>
-                        </div>
-                        <div class="col-xs-12" id="travelChart">
-                        {{Selectionner un trajet pour voir le détail.}}
-                        </div>
+                            <div class="col-xs-12 jeeda_panel_flat_tile FONC_detail_trajet">
+                                <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Detail du trajet}}</div>
+                                <div class="col-xs-12">
+                                    <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
+                                        <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Distance}}</div>
+                                        <center><span class="FONC_travel_range" id="FONC_travel_range">---</span> km </center>
+                                    </div>
+                                    <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
+                                        <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{kW Conso}}</div>
+                                        <center><span class="FONC_travel_energy" id="FONC_travel_energy">---</span> kw </center>
+                                    </div>
+                                    <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
+                                        <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Durée}}</div>
+                                        <center><span class="FONC_travel_duration" id="FONC_travel_duration">--h--</span> </center>
+                                    </div>
+                                    <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
+                                        <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Vitesse}}</div>
+                                        <center><span class="FONC_travel_speed" id="FONC_travel_speed">---</span> km / h </center>
+                                    </div>
+                                    <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
+                                        <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Consommation}}</div>
+                                        <center><span class="FONC_travel_conso" id="FONC_travel_conso">---</span> kw/100 </center>
+                                    </div>
+                                    <div class="col-xs-4 jeeda_panel_flat_tile " style="width:140px;">
+                                        <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{WLTP}}</div>
+                                        <center><span class="FONC_travel_wltp" id="FONC_travel_wltp">---</span> km </center>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12" id="travelChart">
+                                {{Selectionner un trajet pour voir le détail.}}
+                                </div>
                             </div>
                     </div>
                     <!-- Onglet des commandes de l'équipement -->

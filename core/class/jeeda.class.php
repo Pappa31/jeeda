@@ -222,7 +222,13 @@ public static function deamon_stop() {
     log::add('jeeda','debug', $id);
     $vehicule = eqLogic::byId($id,'jeeda',false);
     if (is_object($vehicule)){
-      return $vehicule->getTravelData($startDate,$endDate);
+      // Recupere les changements d'état de deplacement du vehicule
+      $cmd = $vehicule->getCmd(null, 'engine_type');
+      if($cmd->execCmd()=="iV")
+        return $vehicule->getElectricTravelData($startDate,$endDate);
+      else
+        return $vehicule->getThermicTravelData($startDate,$endDate);
+
     }else{
       log::add('jeeda','warning', 'VIN '. $id . ' inconnu');  
       throw new Exception('VIN '. $id . ' inconnu', jeeda::$ERROR_ID_INCONNU);
@@ -252,7 +258,15 @@ public static function deamon_stop() {
     log::add('jeeda','debug', $id);
     $vehicule = eqLogic::byId($id,'jeeda',false);
     if (is_object($vehicule)){
-      return $vehicule->getChargingInfo($startDate,$endDate);
+      $cmd = $vehicule->getCmd(null, 'engine_type');
+      if($cmd->execCmd()=="iV")
+        return $vehicule->getChargingInfo($startDate,$endDate);
+      else
+      {
+        $stat['general'] = array();
+        $stat['detaillee'] = array();
+        return json_encode($stat);
+      }
     }else{
       log::add('jeeda','warning', 'ID '. $id . ' inconnu');  
       throw new Exception('ID '. $id . ' inconnu', jeeda::$ERROR_ID_INCONNU);
@@ -714,15 +728,82 @@ public static function deamon_stop() {
     return $trajet;
   }
 
-
-  public function getTravelData($debut,$fin){
+  public function getThermicTravelData($debut,$fin){
     log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
     /*$debut = date("Y-m-d H:i:s", strtotime("-7 day"));
     $fin = date("Y-m-d H:i:s", strtotime("Now"));*/
     $trajets = array();
     log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' debut ' . $debut);
-    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' fin ' . $fin);
+        
+    // Recupere les changements d'état de deplacement du vehicule
+    $cmd = $this->getCmd(null, 'vehicle_moving');
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' id ' . $cmd->getId());
+    $cmdDistance = $this->getCmd(null, 'distance');
+    $cmdRange = $this->getCmd(null, 'combustion_range');
+    $cmdCapacity = $this->getCmd(null, 'fuel_level');
+    $values = history::all($cmd->getId(),$debut,$fin);
+    $dateDebut = null;
+    $header = ['date','Durée','distance','Vitesse Moy.','Impact autonomie','Efficience','l/100 km','Autonomie'];
+    $key = ['duree','distance','vitesseMoy','kwConso','kmConso','delta','consoMoy','WLTP'];
+    foreach ($values as $value) {
+      $date = $value->getDatetime();
+      log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' manage history '.$date);
+      $distance = history::byCmdIdAtDatetime($cmdDistance->getId(),$value->getDatetime());
+      $fuelLevel = history::byCmdIdAtDatetime($cmdCapacity->getId(),$value->getDatetime());
+      $Range = history::byCmdIdAtDatetime($cmdRange->getId(),$value->getDatetime());
+      // detection debut trajet
+      if ($value->getValue() == 1){
+        log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' detected begining ');
+        $dateDebut = $date;
+        $trajets[$dateDebut]['distanceDebut'] = $distance->getValue();
+        $trajets[$dateDebut]['LevelDebut'] = $fuelLevel->getValue();
+        $trajets[$dateDebut]['RangeDebut'] = $Range->getValue();
+        $trajets[$dateDebut]['dateDebut'] = $dateDebut;
+      } else {
+        log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' detected end ');
+        // prise en compte d'une premiere ligne historique qui correspond à la fin du trajet
+        if (null!=$dateDebut){
+          $trajets[$dateDebut]['distanceFin'] = $distance->getValue();        
+          $trajets[$dateDebut]['LevelFin'] = $fuelLevel->getValue();
+          $trajets[$dateDebut]['RangeFin'] = $Range->getValue();
+          $trajets[$dateDebut]['dateFin'] = $date;
+          $trajets[$dateDebut]['distance'] = $trajets[$dateDebut]['distanceFin'] - $trajets[$dateDebut]['distanceDebut'];
+          $trajets[$dateDebut]['duree'] = strval(floor((strtotime($date) - strtotime($dateDebut))/60));
+          $trajets[$dateDebut]['kmConso'] = $trajets[$dateDebut]['RangeDebut'] - $trajets[$dateDebut]['RangeFin'];
+          if ($trajets[$dateDebut]['distance'] == 0){
+            $trajets[$dateDebut]['consoMoy'] = 0;
+            $trajets[$dateDebut]['delta'] = "";
+          }else{
+            $trajets[$dateDebut]['consoMoy'] = $trajets[$dateDebut]['distance'] / $trajets[$dateDebut]['distance'] * 100;
+            $trajets[$dateDebut]['delta'] = ($trajets[$dateDebut]['kmConso'] / $trajets[$dateDebut]['distance'])*100;
+          }
+          $trajets[$dateDebut]['vitesseMoy'] = $trajets[$dateDebut]['distance'] / (floor($trajets[$dateDebut]['duree']/60)+($trajets[$dateDebut]['duree']%60)/60);         
+          if ($trajets[$dateDebut]['kmConso'] == 0){
+            $trajets[$dateDebut]['WLTP'] = "";
+          } else{
+            $trajets[$dateDebut]['WLTP'] = round($trajets[$dateDebut]['distance']  / $trajets[$dateDebut]['kmConso']);
+          }
+        }
+      }
+    }
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' end manage data ');    
+    krsort($trajets);
+    $retour['data'] = $trajets;
+    $retour['header'] = $header;
+    $retour['key'] = $key;
+    $retour = json_encode($retour);
+    log::add('jeeda','debug', 'Data travels' . $retour);
+    log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
+    return $retour;
     
+  }
+  public function getElectricTravelData($debut,$fin){
+    log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
+    /*$debut = date("Y-m-d H:i:s", strtotime("-7 day"));
+    $fin = date("Y-m-d H:i:s", strtotime("Now"));*/
+    $trajets = array();
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' debut ' . $debut);
+        
     // Recupere les changements d'état de deplacement du vehicule
     $cmd = $this->getCmd(null, 'vehicle_moving');
     log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' id ' . $cmd->getId());
@@ -733,6 +814,8 @@ public static function deamon_stop() {
     $values = history::all($cmd->getId(),$debut,$fin);
     $dateDebut = null;
     $capa = is_object($cmdBatteryCapacity) ? $cmdBatteryCapacity->execCmd() : 0;
+    $header = ['date','Durée','distance','Vitesse Moy.','kW Conso','Impact autonomie','Efficience','kW/100 km','Autonomie WLTP'];
+    $key = ['duree','distance','vitesseMoy','kwConso','kmConso','delta','consoMoy','WLTP'];
     foreach ($values as $value) {
       $date = $value->getDatetime();
       log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' manage history '.$date);
@@ -778,9 +861,13 @@ public static function deamon_stop() {
     }
     log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' end manage data ');    
     krsort($trajets);
-    $retour = json_encode($trajets);
+    $retour['data'] = $trajets;
+    $retour['header'] = $header;
+    $retour['key'] = $key;
+    $retour = json_encode($retour);
     log::add('jeeda','debug', 'Data travels' . $retour);
     log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
+
     return $retour;
   }
   public function getCarData(){
@@ -810,11 +897,11 @@ public static function deamon_stop() {
 		$a['model_year'] = is_object($cmd) ? $cmd->execCmd() : '';
     $a['model_year_id'] = is_object($cmd) ? $cmd->getId() : '';
 
-    $a['has_moteur_thermique'] = $this->getConfiguration("is_engine_capacity_supported","0");
-    $cmd = $this->getCmd(null, 'electric_range');
-    $a['display_engine_capacity'] = $this->getConfiguration("is_engine_capacity_supported","0") && is_object($cmd) ? $cmd->getIsVisible() : 0;
-		$a['engine_capacity'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $a['engine_capacity_id'] = is_object($cmd) ? $cmd->getId() : '';
+    $a['has_moteur_thermique'] = $this->getConfiguration("is_combustion_range_supported","0");
+    $cmd = $this->getCmd(null, 'combustion_range');
+    $a['display_combustion_range'] = $this->getConfiguration("is_combustion_range_supported","0") && is_object($cmd) ? $cmd->getIsVisible() : 0;
+		$a['combustion_range'] = is_object($cmd) ? $cmd->execCmd() : '';
+    $a['combustion_range_id'] = is_object($cmd) ? $cmd->getId() : '';
     $cmd = $this->getCmd(null, 'fuel_level');
     $a['display_fuel_level'] = $this->getConfiguration("is_fuel_level_supported","0") && is_object($cmd) ? $cmd->getIsVisible() : 0;
 		$a['fuel_level'] = is_object($cmd) ? $cmd->execCmd() : '';
@@ -869,11 +956,11 @@ public static function deamon_stop() {
 		$a['charging_time_left'] = is_object($cmd) ? $cmd->execCmd() : '';
     $a['charging_time_left_id'] = is_object($cmd) ? $cmd->getId() : '';
 
-    $a['has_entretien'] = $this->getConfiguration("is_oil_inspection_distance_supported","0");
-    $cmd = $this->getCmd(null, 'oil_inspection_distance');
-    $a['display_oil_inspection_distance'] = $this->getConfiguration("is_oil_inspection_distance_supported","0") && is_object($cmd) ? $cmd->getIsVisible() : 0;
-		$a['oil_inspection_distance'] = is_object($cmd) ? $cmd->execCmd() : '';
-    $a['oil_inspection_distance_id'] = is_object($cmd) ? $cmd->getId() : '';
+    $a['has_entretien'] = $this->getConfiguration("is_service_inspection_distance_supported","0");
+    $cmd = $this->getCmd(null, 'service_inspection_distance');
+    $a['display_service_inspection_distance'] = $this->getConfiguration("is_service_inspection_distance_supported","0") && is_object($cmd) ? $cmd->getIsVisible() : 0;
+		$a['service_inspection_distance'] = is_object($cmd) ? $cmd->execCmd() : '';
+    $a['service_inspection_distance_id'] = is_object($cmd) ? $cmd->getId() : '';
 
     $a['has_clim'] = $this->getConfiguration("is_climatisation_supported","0");
     $cmd = $this->getCmd(null, 'climatisation_target_temperature');
