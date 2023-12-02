@@ -28,6 +28,23 @@ $('#bt_validChangeDate').on('click',function(){
     loadData(startDate,endDate);
 });
 
+
+document.getElementById('eqlogic_select').onchange = function(){
+    console.log("Changement vehicule");
+    jeeda.vehiculeSelected = document.getElementById('eqlogic_select').value;
+    globalEqLogic = jeeda.vehiculeSelected;
+    startDate = $('#in_startDate').value();
+    endDate = $('#in_endDate').value();
+    loadData(startDate,endDate);
+};
+
+function isInt(n) 
+{
+    return n != "" && !isNaN(n) && Math.round(n) == n;
+}
+function isFloat(n){
+    return n != "" && !isNaN(n) && Math.round(n) != n;
+}
 function loadData(startDate, endDate){
     console.log('loadData for ' + globalEqLogic);
     // Recupere les informations du véhicule
@@ -46,7 +63,9 @@ function loadData(startDate, endDate){
             handleAjaxError(request, status, error);
         },
         success: function (data) {
+            console.log(data.result);
             carData = JSON.parse(data.result)
+            
             jeedom.cmd.update['logo_car'] = function(_options) {
                 if (_options.isDisplayed=="1"){
                     document.getElementById("logo_car").src=_options.display_value;
@@ -64,12 +83,14 @@ function loadData(startDate, endDate){
             if (carData['has_moteur_thermique'] == '0'){
                 $('.FONC_moteur_thermique').hide();
             }else{
-                updateDOMInnerHTML('engine_capacity', carData['engine_capacity'], carData['display_engine_capacity'],carData['engine_capacity_id']);
+                $('.FONC_moteur_thermique').show();
+                updateDOMInnerHTML('combustion_range', carData['combustion_range'], carData['display_combustion_range'],carData['combustion_range_id']);
                 updateDOMInnerHTML('fuel_level', carData['fuel_level'], carData['display_fuel_level'],carData['fuel_level_id']);
             }
             if (carData['has_moteur_electrique'] == '0'){
                 $('.FONC_moteur_electrique').hide();
             }else{
+                $('.FONC_moteur_electrique').show();
                 updateDOMInnerHTML('electrique_range', carData['electrique_range'], carData['display_electrique_range'],carData['electrique_range_id']);
                 jeeda.display_battery_capacity = carData['display_battery_capacity'];
                 jeeda.battery_capacity = carData['battery_capacity'];
@@ -77,7 +98,12 @@ function loadData(startDate, endDate){
             }
             if (carData['has_recharge'] == '0'){
                 $('.FONC_recharge').hide();
+                $('.TAB_charge').hide();
+                $('.FONC_detail_trajet').hide();
             }else{
+                $('.FONC_recharge').show();
+                $('.TAB_charge').show();
+                $('.FONC_detail_trajet').show();
                 updateDOMIcon('charging_cable_connected', carData['charging_cable_connected'], carData['display_charging_cable_connected'], carData['charging_cable_connected_id'], 'charging', carData['charging'], carData['display_charging'], carData['charging_id']);
                 updateDOMInnerHTML('charge_rate', carData['charge_rate'] , carData['display_charge_rate'],carData['charge_rate_id']);
                 updateDOMInnerHTML('charging_power', carData['charging_power'] , carData['display_charging_power'],carData['charging_power_id']);
@@ -87,11 +113,13 @@ function loadData(startDate, endDate){
             if (carData['has_entretien'] == '0'){
                 $('.FONC_entretien').hide();
             }else{
-                updateDOMInnerHTML('oil_inspection_distance', 'Entretien dans ' + carData['oil_inspection_distance'] + ' km', carData['display_oil_inspection_distance'],carData['oil_inspection_distance_id']);
+                $('.FONC_entretien').show();
+                updateDOMInnerHTML('service_inspection_distance', 'Entretien dans ' + carData['service_inspection_distance'] + ' km', carData['display_service_inspection_distance'],carData['service_inspection_distance_id']);
             }
             if (carData['has_clim'] == '0'){
                 $('.FONC_clim').hide();
             }else{
+                $('.FONC_clim').show();
                 updateDOMInnerHTML('consigne', carData['consigne'] , carData['display_consigne'],carData['consigne_id']);
                 updateDOMInnerHTMLTime('climatisation_time_left', carData['climatisation_time_left'], carData['display_climatisation_time_left'],carData['climatisation_time_left_id']);
             }
@@ -122,18 +150,26 @@ function loadData(startDate, endDate){
             travelsData = JSON.parse(data.result);
             console.log(travelsData);
             var tr;
+
+            $('#table_cmd thead').empty();
+            tr = "<tr>";
+            Object.entries(travelsData['header']).forEach(([key, value]) => {   
+                tr += "<th>"+value+"</td>";
+            });
+            tr += "</tr>";
+            $('#table_cmd thead').append(tr);
+
+            tr='';
             $('#table_cmd tbody').empty();
-            Object.entries(travelsData).forEach(([key, value]) => {
+            Object.entries(travelsData['data']).forEach(([key, value]) => {
                 tr = "<tr onclick='showTravel(\" " + key + " \",\"" + value['dateFin'] + "\",\"" + convertTime(value['duree']) + "\",\"" + parseInt(value['distance']) + "\",\"" + parseFloat(value['kwConso']).toFixed(2) + "\",\"" + parseFloat(value['vitesseMoy']).toFixed(2) + "\",\"" + parseFloat(value['consoMoy']).toFixed(2) + "\",\"" + value['WLTP'] + "\"  )'>";
                 tr += "<td>"+key+"</td>";
-                tr += "<td>"+convertTime(value['duree'])+"</td>";
-                tr += "<td>"+parseInt(value['distance'])+"</td>";
-                tr += "<td>"+parseFloat(value['vitesseMoy']).toFixed(2)+"</td>";
-                tr += "<td>"+parseFloat(value['kwConso']).toFixed(2)+"</td>";
-                tr += "<td>"+value['kmConso']+"</td>";
-                tr += "<td>"+parseFloat(value['delta']).toFixed(2)+"%</td>";
-                tr += "<td>"+parseFloat(value['consoMoy']).toFixed(2)+"</td>";
-                tr += "<td>"+value['WLTP']+"</td>";
+                Object.entries(travelsData['key']).forEach(([keyData, valueData]) => {
+                    if (isFloat(value[valueData]))
+                        tr += "<td>"+parseFloat(value[valueData]).toFixed(2)+"</td>";
+                    else
+                    tr += "<td>"+value[valueData]+"</td>";
+                });
                 tr += "</tr>";
                 $('#table_cmd tbody').append(tr);
             });
