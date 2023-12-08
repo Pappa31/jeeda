@@ -35,8 +35,10 @@ $eqLogics = eqLogic::byType('jeeda');
                         <?php
                         $currentEqLogic = null;
                         foreach ($eqLogics as $eqLogic) {
-                            echo '<option value="' . $eqLogic->getId() . '">"' . $eqLogic->getName() . '"</option>';
-                            $currentEqLogic = $eqLogic;
+                            if ($eqLogic->getIsVisible()){
+                                echo '<option value="' . $eqLogic->getId() . '">"' . $eqLogic->getName() . '"</option>';
+                                $currentEqLogic = $eqLogic;
+                            }
                         }
                         ?>
         </select>            
@@ -47,7 +49,7 @@ $eqLogics = eqLogic::byType('jeeda');
             <div class="col-xs-6 jeeda_panel_flat_column" style="width:470px; ">
                 <div class="col-xs-12 jeeda_panel_flat_tile FONC_image" style="height:250px;width:440px; ">
                         <div class="jeeda_panel_flat_picture" style="height: 250px; ">
-                            <img class="logo_car" id="logo_car" style="height: 250px; " src="https://ip-modcwp.azureedge.net/modcwp5azv23200005/8X8XPUwFvBgM0CK-U9pbg0iQDkeurY6N8mR-9Y0vJAb2INPUxtyog6_B-Mwqxg0_cFBhHk3YT16uJsaRolW8-DKGNEBJ-700390dayvext_front1080.png"></img> 
+                            <img class="logo_car" id="logo_car" style="height: 250px; " src=""></img> 
                         </div>
                 </div>                
                 
@@ -84,6 +86,7 @@ $eqLogics = eqLogic::byType('jeeda');
                 <div class="col-xs-4 jeeda_panel_flat_tile FONC_entretien" id="FONC_entretien"  style="width:140px;">
                     <div class="jeeda_panel_flat_titre_tile " id="titre_tile">{{Entretien}}</div>
                     <div class="jeeda_panel_flat_value_tile " ><span class="FONC_service_inspection_distance" id="FONC_service_inspection_distance">{{Entretien dans}} --- km</span> </div>
+                    <div class="jeeda_panel_flat_value_tile " ><span class="FONC_oil_inspection_distance" id="FONC_oil_inspection_distance">{{Vidange dans}} --- km</span> </div>
                 </div>
             </div>
 
