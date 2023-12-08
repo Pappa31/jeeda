@@ -13,30 +13,32 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-var globalEqLogic = $( "#eqlogic_select option:selected" ).val();
-var jeeda = {
-    vehiculeSelected : $( "#eqlogic_select option:selected" ).val(),
-    display_battery_capacity : 0
+function onLoad(){
+    var globalEqLogic = $( "#eqlogic_select option:selected" ).val();
+    var jeeda = {
+        vehiculeSelected : $( "#eqlogic_select option:selected" ).val(),
+        display_battery_capacity : 0
+    }
+    $(".in_datepicker").datepicker();
+
+    loadData(travelsDate.start,travelsDate.end);
+
+    $('#bt_validChangeDate').on('click',function(){
+        startDate = $('#in_startDate').value();
+        endDate = $('#in_endDate').value();
+        loadData(startDate,endDate);
+    });
+
+
+    document.getElementById('eqlogic_select').onchange = function(){
+        console.log("Changement vehicule");
+        jeeda.vehiculeSelected = document.getElementById('eqlogic_select').value;
+        globalEqLogic = jeeda.vehiculeSelected;
+        startDate = $('#in_startDate').value();
+        endDate = $('#in_endDate').value();
+        loadData(startDate,endDate);
+    };
 }
-$(".in_datepicker").datepicker();
-
-loadData(travelsDate.start,travelsDate.end);
-
-$('#bt_validChangeDate').on('click',function(){
-    startDate = $('#in_startDate').value();
-    endDate = $('#in_endDate').value();
-    loadData(startDate,endDate);
-});
-
-
-document.getElementById('eqlogic_select').onchange = function(){
-    console.log("Changement vehicule");
-    jeeda.vehiculeSelected = document.getElementById('eqlogic_select').value;
-    globalEqLogic = jeeda.vehiculeSelected;
-    startDate = $('#in_startDate').value();
-    endDate = $('#in_endDate').value();
-    loadData(startDate,endDate);
-};
 
 function isInt(n) 
 {
@@ -115,6 +117,7 @@ function loadData(startDate, endDate){
             }else{
                 $('.FONC_entretien').show();
                 updateDOMInnerHTML('service_inspection_distance', 'Entretien dans ' + carData['service_inspection_distance'] + ' km', carData['display_service_inspection_distance'],carData['service_inspection_distance_id']);
+                updateDOMInnerHTML('oil_inspection_distance', 'Vidange dans ' + carData['oil_inspection_distance'] + ' km', carData['display_oil_inspection_distance'],carData['oil_inspection_distance_id']);
             }
             if (carData['has_clim'] == '0'){
                 $('.FONC_clim').hide();

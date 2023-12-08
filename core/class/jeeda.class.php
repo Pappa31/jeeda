@@ -224,7 +224,9 @@ public static function deamon_stop() {
     if (is_object($vehicule)){
       // Recupere les changements d'état de deplacement du vehicule
       $cmd = $vehicule->getCmd(null, 'engine_type');
-      if($cmd->execCmd()=="iV")
+      
+      //if((is_object($cmd) ? $cmd->execCmd() : '')=="iV")
+      if ($vehicule->hasElectricEngine())
         return $vehicule->getElectricTravelData($startDate,$endDate);
       else
         return $vehicule->getThermicTravelData($startDate,$endDate);
@@ -259,7 +261,8 @@ public static function deamon_stop() {
     $vehicule = eqLogic::byId($id,'jeeda',false);
     if (is_object($vehicule)){
       $cmd = $vehicule->getCmd(null, 'engine_type');
-      if($cmd->execCmd()=="iV")
+      //if((is_object($cmd) ? $cmd->execCmd() : '')=="iV")
+      if ($vehicule->hasElectricEngine())
         return $vehicule->getChargingInfo($startDate,$endDate);
       else
       {
@@ -584,8 +587,9 @@ public static function deamon_stop() {
     // detail du trajet basé sur l'evolution de la distance
     $values = history::all($cmdCharging->getId(),$debut,$fin);
     $cmdBatteryCapacity = $this->getCmd(null, 'battery_capacity');
-    $cmdChargingPower = $this->getCmd(null, 'charging_power');
     $capa = is_object($cmdBatteryCapacity) ? $cmdBatteryCapacity->execCmd() : 0;
+    if($this->getConfiguration("is_charging_power_supported","0")==1)
+      $cmdChargingPower = $this->getCmd(null, 'charging_power');
     $statGeneral = array();
     $statDetaillee = array();
     $statGeneral['totKW'] = 0;
@@ -597,7 +601,8 @@ public static function deamon_stop() {
     $start = False;
     foreach ($values as $value) {
       $batteryLevel = history::byCmdIdAtDatetime($cmdBatteryLevel->getId(),$value->getDatetime());
-      $chargingPower = history::byCmdIdAtDatetime($cmdChargingPower->getId(),$value->getDatetime());
+      if($this->getConfiguration("is_charging_power_supported","0")==1)
+        $chargingPower = history::byCmdIdAtDatetime($cmdChargingPower->getId(),$value->getDatetime());
       $date = $value->getDatetime();
       // debut d'une charge
       if ($value->getValue() == 1){
@@ -605,8 +610,15 @@ public static function deamon_stop() {
         $initLevelBattery = $batteryLevel->getValue();
         $start = True;
         $initDate = $date;
-        $statGeneral['avgChargingPower'] = $statGeneral['avgChargingPower'] + $chargingPower->getValue();
-        $statDetaillee[$date]['avgChargingPower']= $chargingPower->getValue();
+        if($this->getConfiguration("is_charging_power_supported","0")==1){
+          $statGeneral['avgChargingPower'] = $statGeneral['avgChargingPower'] + $chargingPower->getValue();
+          $statDetaillee[$date]['avgChargingPower']= $chargingPower->getValue();
+        }
+        else
+        {
+          $statGeneral['avgChargingPower'] = 0;
+          $statDetaillee[$date]['avgChargingPower']= 0;
+        }
       }
       else{
         // Detection que nous avons détecté un debut de charge sur la période
@@ -739,7 +751,7 @@ public static function deamon_stop() {
     $cmd = $this->getCmd(null, 'vehicle_moving');
     log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.' id ' . $cmd->getId());
     $cmdDistance = $this->getCmd(null, 'distance');
-    $cmdRange = $this->getCmd(null, 'combustion_range');
+    $cmdRange = $this->getCmd(null, 'primary_range');
     $cmdCapacity = $this->getCmd(null, 'fuel_level');
     $values = history::all($cmd->getId(),$debut,$fin);
     $dateDebut = null;
@@ -870,6 +882,19 @@ public static function deamon_stop() {
 
     return $retour;
   }
+  public function hasElectricEngine(){
+    log::add('jeeda','debug', 'Entree ' . __CLASS__ . '.' . __FUNCTION__);
+    $hasElectriqueEngine = 0;
+    if ($this->getConfiguration("is_engine_type_supported","0") == 1){
+      $cmd = $this->getCmd(null, 'engine_type');
+      if((is_object($cmd) ? $cmd->execCmd() : '')=="iV")
+        $hasElectriqueEngine = 1;
+    }else if ($this->getConfiguration("is_battery_level_supported","0") == 1){
+        $hasElectriqueEngine = 1;
+    }
+    log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
+    return $hasElectriqueEngine;
+  }
   public function getCarData(){
     log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
     $a = array();
@@ -956,11 +981,15 @@ public static function deamon_stop() {
 		$a['charging_time_left'] = is_object($cmd) ? $cmd->execCmd() : '';
     $a['charging_time_left_id'] = is_object($cmd) ? $cmd->getId() : '';
 
-    $a['has_entretien'] = $this->getConfiguration("is_service_inspection_distance_supported","0");
+    $a['has_entretien'] = $this->getConfiguration("is_service_inspection_distance_supported","0") + $this->getConfiguration("is_oil_inspection_distance_supported","0");
     $cmd = $this->getCmd(null, 'service_inspection_distance');
     $a['display_service_inspection_distance'] = $this->getConfiguration("is_service_inspection_distance_supported","0") && is_object($cmd) ? $cmd->getIsVisible() : 0;
 		$a['service_inspection_distance'] = is_object($cmd) ? $cmd->execCmd() : '';
     $a['service_inspection_distance_id'] = is_object($cmd) ? $cmd->getId() : '';
+    $cmd = $this->getCmd(null, 'oil_inspection_distance');
+    $a['display_oil_inspection_distance'] = $this->getConfiguration("is_oil_inspection_distance_supported","0") && is_object($cmd) ? $cmd->getIsVisible() : 0;
+		$a['oil_inspection_distance'] = is_object($cmd) ? $cmd->execCmd() : '';
+    $a['oil_inspection_distance_id'] = is_object($cmd) ? $cmd->getId() : '';
 
     $a['has_clim'] = $this->getConfiguration("is_climatisation_supported","0");
     $cmd = $this->getCmd(null, 'climatisation_target_temperature');
@@ -1008,12 +1037,15 @@ public static function deamon_stop() {
     $replace['#distance#'] = is_object($cmd) ? $cmd->toHtml($_version, '') : '';
 
     log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get engine type');
-    $cmd = $this->getCmd(null, 'engine_type');
-    $cmd->setTemplate($version,'label');
-    $cmd->save();
-    $typeMoteur = $cmd->execCmd();
-    $label['#title#'] = "Type de moteur";
-    $replace['#engine_type#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    $replace['#engine_type#']='';
+    if ($this->getConfiguration("is_combustion_range_supported","0")!=0){
+      $cmd = $this->getCmd(null, 'engine_type');
+      $cmd->setTemplate($version,'label');
+      $cmd->save();
+      $typeMoteur = $cmd->execCmd();
+      $label['#title#'] = "Type de moteur";
+      $replace['#engine_type#'] = template_replace($label, is_object($cmd) ? $cmd->toHtml($_version, '') : '');
+    }
 
     log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get model');
     $cmd = $this->getCmd(null, 'model');
@@ -1045,8 +1077,8 @@ public static function deamon_stop() {
 		
     log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__.'::Get thermique range');
     $replace['#thermique_range#'] = '';
-    if ($this->getConfiguration("is_combustion_range_supported","0")!=0){
-      $cmd = $this->getCmd(null, 'combustion_range');
+    if ($this->getConfiguration("is_primary_range_supported","0")!=0){
+      $cmd = $this->getCmd(null, 'primary_range');
       $cmd->setUnite("Km");
       $cmd->setTemplate($version,'label');
       $cmd->save();    
