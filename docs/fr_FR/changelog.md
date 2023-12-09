@@ -4,6 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 09/12/2023
+- Correction chargement du plugin
+
 # 08/12/2023
 - Ajout compatibilité Citigo
 

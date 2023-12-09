@@ -13,7 +13,6 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-function onLoad(){
     var globalEqLogic = $( "#eqlogic_select option:selected" ).val();
     var jeeda = {
         vehiculeSelected : $( "#eqlogic_select option:selected" ).val(),
@@ -38,7 +37,6 @@ function onLoad(){
         endDate = $('#in_endDate').value();
         loadData(startDate,endDate);
     };
-}
 
 function isInt(n) 
 {
