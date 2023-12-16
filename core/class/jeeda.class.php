@@ -252,6 +252,19 @@ public static function deamon_stop() {
     }
     log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
   }
+
+  public static function showChargeFor($id,$startDate,$endDate){
+    log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
+    log::add('jeeda','debug', $id);
+    $vehicule = eqLogic::byId($id,'jeeda',false);
+    if (is_object($vehicule)){
+      return $vehicule->showCharge($startDate,$endDate);
+    }else{
+      log::add('jeeda','warning', 'VIN '. $id . ' inconnu');  
+      throw new Exception('VIN '. $id . ' inconnu', jeeda::$ERROR_ID_INCONNU);
+    }
+    log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
+  }
   /**
    * Recupere les stats de chargement d'un véhicle
    */
@@ -627,6 +640,7 @@ public static function deamon_stop() {
           $statDetaillee[$initDate]['totKW'] = ($batteryLevel->getValue() - $initLevelBattery) * $capa / 100;
           $statGeneral['duree'] = $statGeneral['duree'] + strval(floor((strtotime($date) - strtotime($initDate))/60));
           $statDetaillee[$initDate]['duree'] = strval(floor((strtotime($date) - strtotime($initDate))/60));
+          $statDetaillee[$initDate]['dateFin'] = $date;
         }
       }
     }
@@ -705,6 +719,41 @@ public static function deamon_stop() {
     $showTravel['data'] = $trajet;
     return $showTravel;
   }
+
+  public function showCharge($debut,$fin){
+    log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__." debut ".$debut);
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__." fin ".$fin);
+    
+    // detail de la charge dans le temps
+    $power = array();
+    $battery = array();
+    $cmdBatteryLevel = $this->getCmd(null, 'battery_level');
+    $cmdChargingPower = $this->getCmd(null, 'charging_power');
+    $power[0]['name'] = 'Puissance charge';
+    $power[0]['data'] = array();
+    $cmdElectricRange = $this->getCmd(null, 'electric_range');
+    $power[1]['name'] = 'Autonomie';
+    $power[1]['data'] = array();
+    $values = history::all($cmdBatteryLevel->getId(),$debut,$fin);
+    $nbVal = count($values);
+    
+    log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__. ' nb date : ' . $nbVal);
+    foreach ($values as $value) {
+      array_push($battery, (float) $value->getValue());
+      $electricRange = history::byCmdIdAtDatetime($cmdElectricRange->getId(),$value->getDatetime());
+      $ChargingPower = history::byCmdIdAtDatetime($cmdChargingPower->getId(),$value->getDatetime());
+      array_push($power[0]['data'], (float) $ChargingPower->getValue());
+      array_push($power[1]['data'], (float) $electricRange->getValue());
+    }
+    log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
+    $showTravel['date'] = $debut;
+    $showTravel['data'] = $power;
+    $showTravel['battery'] = $battery;
+    return $showTravel;
+  }
+
+
   public function showTravel1($debut,$fin){
     log::add('jeeda','debug', 'Entrer ' . __CLASS__ . '.' . __FUNCTION__);
     //$trajet = array();
