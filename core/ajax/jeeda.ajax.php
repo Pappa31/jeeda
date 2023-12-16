@@ -71,6 +71,13 @@ try {
         log::add('jeeda', 'debug', 'Appel getChargingData success');
         ajax::success($stat);
       break;
+      case 'showCharge': // Synchronise les informations du compte, recuperation de tous les vehicules
+        log::add('jeeda', 'debug', 'Appel showCharge');
+        //$travel['date'] = init('startDate');
+        $travel = jeeda::showChargeFor(init('VIN'),init('startDate'), init('endDate'));
+        log::add('jeeda', 'debug', 'Appel showCharge success');
+        ajax::success($travel);
+      break;
       default:
         log::add('jeeda', 'info', 'Cmd ' . init('action') . 'not yet implemented');
         ajax::error(init('action') . ' not yet implemented', 1);

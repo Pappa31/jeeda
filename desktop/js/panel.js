@@ -209,7 +209,7 @@ function loadData(startDate, endDate){
             var tr;
             $('#table_cmdCharge tbody').empty();
             Object.entries(stat.detaillee).forEach(([key, value]) => {
-                tr = "<tr>"; // "<tr onclick='showTravel(\" " + key + " \",\"" + value['dateFin'] + "\",\"" + convertTime(value['duree']) + "\",\"" + parseInt(value['distance']) + "\",\"" + parseFloat(value['kwConso']).toFixed(2) + "\",\"" + parseFloat(value['vitesseMoy']).toFixed(2) + "\",\"" + parseFloat(value['consoMoy']).toFixed(2) + "\",\"" + value['WLTP'] + "\"  )'>";
+                tr = "<tr onclick='popupChargingDetail(\" " + key + " \",\"" + value['dateFin']  + "\"  )'>";
                 tr += "<td>"+key+"</td>";
                 tr += "<td>"+convertTime(value['duree'])+"</td>";
                 tr += "<td>"+parseFloat(value['totKW']).toFixed(2)+"</td>";
@@ -222,8 +222,87 @@ function loadData(startDate, endDate){
     });
 }
 
+function popupChargingDetail(start, end){
+    $('#md_modal').dialog({title: "{{Detail charge}}"}).load('index.php?v=d&plugin=jeeda&modal=detailCharge').dialog('open');
+    $.ajax({
+        type: 'POST',
+        url: 'plugins/jeeda/core/ajax/jeeda.ajax.php',
+        data: {
+            action: 'showCharge',
+            VIN: globalEqLogic,
+            startDate: start,
+            endDate: end,
+        },
+        dataType: 'json',
+        global: false,
+        error: function (request, status, error) {
+            console.log('Erreur showCharge');
+            console.log({message: '{{Erreur chargement des données de la charge : }}'+status, level: 'warning'});
+            $('#div_alert').showAlert({message: '{{Erreur chargement des données de la charge : }}'+status, level: 'warning'});
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+            console.log(data.result);
+            var chart = {
+                type: 'spline'
+            };
+            var title =  {
+                text: '{{Detail de la charge du }}'+ data.result.date,
+                style: {
+                    fontSize: '10px'
+                }
+            }
+            var xAxis= {
+                labels: {
+                    overflow: 'justify',
+                    format: '{value}%'
+                },
+                title: {
+                    text: '{{% Batterie}}'
+                },
+                categories : data.result.battery
+            };
+            var yAxis = [{
+                labels: {
+                    format: '{value} km',
+                  },
+                title: {
+                    text: '{{Distance}}'
+                }
+            },{
+                labels: {
+                    format: '{value}W',
+                  },
+                title: {
+                    text: '{{Puissance}}'
+                },
+                opposite: true
+            }];
+            var exporting = {
+                enabled: false
+            };
+            var credits= {
+                text: '',
+                href: '',
+            };
+            var series =  data.result.data;
+            var json = {};
+            json.chart = chart;
+            json.title = title;
+            json.xAxis = xAxis;
+            json.yAxis = yAxis;  
+            json.series = series;
+            json.exporting = exporting;
+            json.credits = credits;
+            json['series'][1].yAxis=1;
+            $('#chargeChart').highcharts(json);
+        }
+    });
+}
+
 function showTravel(start, end, duree, distance,kwConso,vitesseMoy,consoMoy,wltp){
     console.log("showTravel");
+    $('#md_modal').dialog({title: "{{Detail trajet}}"}).load('index.php?v=d&plugin=jeeda&modal=detailTravel').dialog('open');
     $.ajax({
         type: 'POST',
         url: 'plugins/jeeda/core/ajax/jeeda.ajax.php',
@@ -263,12 +342,6 @@ function showTravel(start, end, duree, distance,kwConso,vitesseMoy,consoMoy,wltp
                 },
                 dateTimeLabelFormats: {
                     minute: ['%H:%M', '%H:%M', '-%H:%M']
-                    /*minute: ['%m/%e/%y %H:%M', '%m/%e/%y %H:%M', '-%H:%M'],
-                    hour: ['%m/%e/%y %H:%M', '%m/%e/%y %H:%M', '-%H:%M'],
-                    day: ['%m/%e/%y %H:%M', '%m/%e/%y %H:%M', '-%H:%M'],
-                    week: ['%m/%e/%y %H:%M', '%m/%e/%y %H:%M', '-%H:%M'],
-                    month: ['%m/%e/%y %H:%M', '%m/%e/%y %H:%M', '-%H:%M'],
-                    year: ['%m/%e/%y %H:%M', '%m/%e/%y %H:%M', '-%H:%M']*/
                 },
                 categories : data.result.date
             };
