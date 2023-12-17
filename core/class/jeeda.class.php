@@ -733,18 +733,21 @@ public static function deamon_stop() {
     $power[0]['name'] = 'Puissance charge';
     $power[0]['data'] = array();
     $cmdElectricRange = $this->getCmd(null, 'electric_range');
-    $power[1]['name'] = 'Autonomie';
+    $power[1]['name'] = 'Gain en autonomie';
     $power[1]['data'] = array();
     $values = history::all($cmdBatteryLevel->getId(),$debut,$fin);
     $nbVal = count($values);
-    
+    $previousValue = 0;
     log::add('jeeda','debug', __CLASS__ . '.' . __FUNCTION__. ' nb date : ' . $nbVal);
     foreach ($values as $value) {
       array_push($battery, (float) $value->getValue());
       $electricRange = history::byCmdIdAtDatetime($cmdElectricRange->getId(),$value->getDatetime());
       $ChargingPower = history::byCmdIdAtDatetime($cmdChargingPower->getId(),$value->getDatetime());
       array_push($power[0]['data'], (float) $ChargingPower->getValue());
-      array_push($power[1]['data'], (float) $electricRange->getValue());
+      if ($previousValue != 0){
+        array_push($power[1]['data'], (float) $electricRange->getValue() - $previousValue);
+      }
+      $previousValue = (float) $electricRange->getValue();
     }
     log::add('jeeda','debug', 'Sortie ' . __CLASS__ . '.' . __FUNCTION__);
     $showTravel['date'] = $debut;

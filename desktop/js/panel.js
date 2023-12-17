@@ -244,7 +244,7 @@ function popupChargingDetail(start, end){
         success: function (data) {
             console.log(data.result);
             var chart = {
-                type: 'spline'
+                zoomType: 'xy'
             };
             var title =  {
                 text: '{{Detail de la charge du }}'+ data.result.date,
@@ -294,7 +294,9 @@ function popupChargingDetail(start, end){
             json.series = series;
             json.exporting = exporting;
             json.credits = credits;
-            json['series'][1].yAxis=1;
+            json['series'][0].yAxis=1;
+            json['series'][0].type='spline';
+            json['series'][1].type='column';
             $('#chargeChart').highcharts(json);
         }
     });
