@@ -3,6 +3,8 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 17/12/2023
+- Graphique charge : inversion axe et gain autonomie
 
 # 16/12/2023
 - Mise à jour de la librairie Skoda Connect, passage en version 1.3.9
