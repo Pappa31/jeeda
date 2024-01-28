@@ -1,6 +1,6 @@
 {
 	"id" : "jeeda",
-	"name" : "Jeedom Skoda",
+	"name" : "Skoda",
 	"description" : {
 		"fr_FR": "Plugin de recuperation des informations des véhicules Skoda"
 	},
