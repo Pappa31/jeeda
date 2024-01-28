@@ -3,6 +3,13 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+
+# 28/01/2024
+- Renommage du plugin en Skoda pour être conforme à la politique Jeedom
+- Correction technique : 
+    - Ajout d'une dépendance python manquante dans script installation
+    - Correction warning sur l'utilisation 
+
 # 17/12/2023
 - Graphique charge : inversion axe et gain autonomie
 
