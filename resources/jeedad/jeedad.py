@@ -41,8 +41,8 @@ except ModuleNotFoundError as e:
 
 try:
 	from jeedom.jeedom import *
-except ImportError:
-	print("Error: importing module jeedom.jeedom")
+except ImportError as e:
+	print(f"Error: importing module jeedom.jeedom : {e}")
 	sys.exit(1)
 
 class jeedaDemon:
