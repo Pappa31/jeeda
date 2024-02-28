@@ -12,8 +12,8 @@
 	"hasDependency" : true,
 	"hasOwnDeamon" : true,
 	"maxDependancyInstallTime" : 0,
-	"changelog" : "https://jeedom.github.io/plugin-template/#language#/changelog",
-	"documentation" : "https://jeedom.github.io/plugin-template/#language#/",
+	"changelog" : "https://github.com/Pappa31/jeeda/blob/Dev/docs/fr_FR/changelog.md",
+	"documentation" : "https://github.com/Pappa31/jeeda/blob/Dev/docs/fr_FR/index.md",
 	"language": [
 		"fr_FR"
 	],
